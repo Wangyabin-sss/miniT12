@@ -1,0 +1,6 @@
+"main.obj",
+"iic.obj",
+"sys.obj",
+"mpu6050.obj" 
+TO "T12" 
+RAMSIZE(256) 

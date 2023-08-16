@@ -1,0 +1,234 @@
+C51 COMPILER V9.60.7.0   MAIN                                                              08/16/2023 18:10:38 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          
+   2          //#include "iic.h"
+   3          #include "mpu6050.h"
+   4          
+   5          sbit LED    = P3^5;
+   6          sbit SWITCH = P3^6;
+   7          sbit KEY1   = P3^3;
+   8          sbit KEY2   = P3^2;
+   9          
+  10          u8 _K1 = 0,_K2 = 0;
+  11          u8 KEY1_DOWN=0,KEY2_DOWN=0;
+  12          
+  13          //运放电压与温度对应表  0  50  100  150  200  250  300  350  400  450
+  14          static u16 temp_val[10] = {0};
+  15          
+  16          void gpio_init(void);
+  17          void ADC_init(void);
+  18          u16 ADC_get_val(u8 channel);
+  19          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax);
+  20          void Timer0_Init(void);
+  21          
+  22          int main()
+  23          {
+  24   1              u16 PWMVAL = 0;
+  25   1              float powerval=0;
+  26   1              u16 pwmtime = 0;
+  27   1              u16 systime = 0;
+  28   1              u32 t12adc_val = 0;
+  29   1              u32 kes = 0;
+  30   1              int z_data=0;
+  31   1              
+  32   1              gpio_init();
+  33   1              OLED_Init();
+  34   1              ADC_init();
+  35   1              Timer0_Init();
+  36   1              InitMPU6050();
+  37   1              delay_ms(10);
+  38   1              EA = 1;
+  39   1              SWITCH = 0;
+  40   1              
+  41   1              powerval = ADC_get_val(1);
+  42   1              powerval = (powerval*3300)/4096;
+  43   1              powerval = powerval/10000*100;
+  44   1              //OLED_ShowNum(0,2,powerval*10,8,16);
+  45   1              
+  46   1              
+  47   1              while(1)
+  48   1              {
+  49   2                      if(pwmtime<PWMVAL)
+  50   2                      {
+  51   3                              SWITCH = 1;
+  52   3                              LED = 0;
+  53   3                      }
+  54   2                      else
+  55   2                      {
+C51 COMPILER V9.60.7.0   MAIN                                                              08/16/2023 18:10:38 PAGE 2   
+
+  56   3                              SWITCH = 0;
+  57   3                              LED = 1;
+  58   3                      }
+  59   2                      delay_us(50);
+  60   2                      pwmtime++;
+  61   2                      if(pwmtime==2020)  //50*2000=100000us = 100ms周期
+  62   2                      {
+  63   3                              pwmtime = 0;
+  64   3                              //5s计算刷新一次电源电压
+  65   3                              if(systime%50==0)
+  66   3                              {
+  67   4                                      powerval = ADC_get_val(1);
+  68   4                                      powerval = (powerval*3300)/4096;
+  69   4                                      powerval = powerval/10000*100;
+  70   4                                      //OLED_ShowNum(0,2,powerval*10,8,16);
+  71   4                              }
+  72   3                              t12adc_val = ADC_get_val(0);
+  73   3                              t12adc_val = (t12adc_val*3300)/4096;
+  74   3                              PWMVAL = get_pwmval_with_pid(t12adc_val,750,2000);
+  75   3                              //OLED_ShowNum(0,0,t12adc_val,8,16);
+  76   3                              
+  77   3                              z_data = GetData(MPU_GYRO_XOUTH_REG);
+  78   3                              if(z_data<0)
+  79   3                                      z_data = -z_data;
+  80   3                              OLED_ShowNum(54,0,z_data,6,16);
+  81   3                              z_data = GetData(MPU_GYRO_YOUTH_REG);
+  82   3                              if(z_data<0)
+  83   3                                      z_data = -z_data;
+  84   3                              OLED_ShowNum(54,2,z_data,6,16);
+  85   3                              z_data = GetData(MPU_TEMP_OUTH_REG);
+  86   3                              if(z_data<0)
+  87   3                                      z_data = -z_data;
+  88   3                              OLED_ShowNum(0,2,z_data,6,16);
+  89   3                              
+  90   3                              if(KEY1_DOWN)
+  91   3                              {
+  92   4                                      KEY1_DOWN = 0;
+  93   4                                      OLED_ShowNum(54,0,kes++,6,16);
+  94   4                              }
+  95   3                              if(KEY2_DOWN)
+  96   3                              {
+  97   4                                      KEY2_DOWN = 0;
+  98   4                                      
+  99   4                              }
+ 100   3                              
+ 101   3                              systime++;
+ 102   3                      }
+ 103   2              }
+ 104   1      }
+ 105          
+ 106          
+ 107          void gpio_init(void)
+ 108          {
+ 109   1              P_SW2 |= 0x80;     //使能访问 XFR
+ 110   1              
+ 111   1              P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED  SWITCH
+ 112   1              P3M1 &= ~(3<<5);
+ 113   1              
+ 114   1              P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC
+ 115   1              P1M1 |= (3<<4);
+ 116   1              
+ 117   1              P1M0 &= ~(3<<0);   //设置 P1.0  P1.1为高阻输入   ADC
+C51 COMPILER V9.60.7.0   MAIN                                                              08/16/2023 18:10:38 PAGE 3   
+
+ 118   1              P1M1 |= (3<<0);
+ 119   1              
+ 120   1              P3M0 &= ~(3<<2);    //设置 P3.2  P3.3为双向口模式   KEY
+ 121   1              P3M1 &= ~(3<<2);
+ 122   1              
+ 123   1              KEY1=1;
+ 124   1              KEY2=1;
+ 125   1              SCL=1;
+ 126   1              SDA=1;
+ 127   1      }
+ 128          
+ 129          void ADC_init(void)
+ 130          {
+ 131   1              ADCTIM = 0x3f;//设置 ADC 内部时序
+ 132   1              ADCCFG = 0x0f;//设置 ADC 时钟为系统时钟/2/16
+ 133   1              ADC_CONTR = 0x80;//使能 ADC 模块
+ 134   1      }
+ 135          
+ 136          
+ 137          u16 ADC_get_val(u8 channel)
+ 138          {
+ 139   1              ADC_CONTR |= 0x40;        //启动 AD 转换
+ 140   1              
+ 141   1              ADC_CONTR &= ~(0xf);
+ 142   1              ADC_CONTR |= channel;
+ 143   1              
+ 144   1              _nop_();
+ 145   1              _nop_();
+ 146   1              while (!(ADC_CONTR & 0x20));//查询 ADC 完成标志
+ 147   1              ADC_CONTR &= ~0x20;         //清完成标志
+ 148   1              P2 = ADC_RES;               //读取 ADC 结果
+ 149   1              return (ADC_RES<<4)|(ADC_RESL>>4);
+ 150   1      }
+ 151          
+ 152          
+ 153          #define PVAL  15.0F
+ 154          #define IVAL  0.0F
+ 155          #define DVAL  0.0F
+ 156          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
+ 157          {
+ 158   1              float pwm_val = 0;
+ 159   1              int diff = adcvalwant - adcvalt12;
+ 160   1              pwm_val = PVAL*diff;
+ 161   1              if(pwm_val<0)
+ 162   1                      pwm_val = -pwm_val;
+ 163   1              if(pwm_val > pwmmax)
+ 164   1                      pwm_val = pwmmax;
+ 165   1              if(adcvalt12>adcvalwant)
+ 166   1                      return 100;
+ 167   1              return pwm_val;
+ 168   1      }
+ 169          
+ 170          void Timer0_Isr(void) interrupt 1
+ 171          {
+ 172   1              if(KEY1==0){
+ 173   2                      _K1+=1;
+ 174   2              }else{
+ 175   2                      _K1=0;
+ 176   2              }
+ 177   1              if(KEY2==0){
+ 178   2                      _K2+=1;
+ 179   2              }else{
+C51 COMPILER V9.60.7.0   MAIN                                                              08/16/2023 18:10:38 PAGE 4   
+
+ 180   2                      _K2=0;
+ 181   2              }
+ 182   1              if(_K1>120)
+ 183   1              {
+ 184   2                      _K1=0;
+ 185   2                      KEY1_DOWN=1;
+ 186   2              }
+ 187   1              if(_K2>120)
+ 188   1              {
+ 189   2                      _K2=0;
+ 190   2                      KEY2_DOWN=1;
+ 191   2              }
+ 192   1      }
+ 193          
+ 194          void Timer0_Init(void)          //1000微秒@24.000MHz
+ 195          {
+ 196   1              AUXR |= 0x80;                   //定时器时钟1T模式
+ 197   1              TMOD &= 0xF0;                   //设置定时器模式
+ 198   1              TL0 = 0x40;                             //设置定时初始值
+ 199   1              TH0 = 0xA2;                             //设置定时初始值
+ 200   1              TF0 = 0;                                //清除TF0标志
+ 201   1              TR0 = 1;                                //定时器0开始计时
+ 202   1              ET0 = 1;                                //使能定时器0中断
+ 203   1      }
+ 204          
+ 205          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1146    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     24      30
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,45 @@
+C51 COMPILER V9.60.7.0   SYS                                                               08/16/2023 18:10:38 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SYS
+OBJECT MODULE PLACED IN sys.OBJ
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE sys.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include "sys.h"
+   2          
+   3          
+   4          void delay_ms(u16 ms)
+   5          {
+   6   1           u16 i;
+   7   1           do{
+   8   2                i = FOSC / 10000;
+   9   2                while(--i);   //10T per loop
+  10   2           }while(--ms);
+  11   1      }
+  12          
+  13          
+  14          void delay_us(u16 us)
+  15          {
+  16   1              u16 i = us*6;
+  17   1              while (--i);
+  18   1      }
+  19          
+  20          
+  21          
+  22          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     40    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
