@@ -11,11 +11,24 @@ u8 _K1 = 0,_K2 = 0;
 u8 KEY1_DOWN=0,KEY2_DOWN=0;
 
 //运放电压与温度对应表  0  50  100  150  200  250  300  350  400  450
-static u16 temp_val[10] = {0};
+//  adc
+//  |
+//	|____temp
+//
+#define TEMPMAPNUM 10
+static struct temperature_map{
+	int temp;
+	int adc;
+	float k;
+	float b;
+}temp_map[TEMPMAPNUM] = {{0,0},{50,100},{100,200},{150,300},{200,400},{250,500},{300,600},{350,750},{400,800},{450,850}};
+	
 
 void gpio_init(void);
 void ADC_init(void);
 u16 ADC_get_val(u8 channel);
+u16 temp2adcval(u16 temperature);
+u16 adc2tempval(u16 adcval);
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax);
 void Timer0_Init(void);
 
@@ -26,23 +39,24 @@ int main()
 	u16 pwmtime = 0;
 	u16 systime = 0;
 	u32 t12adc_val = 0;
-	u32 kes = 0;
-	int z_data=0;
+	u16 temp_want = 350,adc_want;
+	s16 mpu_data=0;
+	u8 i;
+	
+	for(i=0;i<TEMPMAPNUM-1;i++)
+	{
+		temp_map[i].k = (temp_map[i+1].adc-temp_map[i].adc)/50.0f;
+		temp_map[i].b = temp_map[i].adc-temp_map[i].k*temp_map[i].temp;
+	}
 	
 	gpio_init();
 	OLED_Init();
 	ADC_init();
 	Timer0_Init();
 	InitMPU6050();
-	delay_ms(10);
+	
 	EA = 1;
 	SWITCH = 0;
-	
-	powerval = ADC_get_val(1);
-	powerval = (powerval*3300)/4096;
-	powerval = powerval/10000*100;
-	//OLED_ShowNum(0,2,powerval*10,8,16);
-	
 	
 	while(1)
 	{
@@ -58,46 +72,35 @@ int main()
 		}
 		delay_us(50);
 		pwmtime++;
-		if(pwmtime==2020)  //50*2000=100000us = 100ms周期
+		if(pwmtime==2004)  //50*2000=100000us = 100ms周期
 		{
 			pwmtime = 0;
-			//5s计算刷新一次电源电压
-			if(systime%50==0)
-			{
-				powerval = ADC_get_val(1);
-				powerval = (powerval*3300)/4096;
-				powerval = powerval/10000*100;
-				//OLED_ShowNum(0,2,powerval*10,8,16);
-			}
+			//计算当前电源电压并显示
+			powerval = ADC_get_val(1);
+			powerval = (powerval*3300)/4096;
+			powerval = powerval/10000*100;
+			OLED_ShowNum(0,2,powerval*10,5,16);
+			
+			//获取mpu6050是否运动
+			mpu_data = GetData(MPU_GYRO_XOUTH_REG);
+			
+			adc_want = temp2adcval(temp_want);
+			//计算运算放大器输出电压
 			t12adc_val = ADC_get_val(0);
 			t12adc_val = (t12adc_val*3300)/4096;
-			PWMVAL = get_pwmval_with_pid(t12adc_val,750,2000);
-			//OLED_ShowNum(0,0,t12adc_val,8,16);
-			
-			z_data = GetData(MPU_GYRO_XOUTH_REG);
-			if(z_data<0)
-				z_data = -z_data;
-			OLED_ShowNum(54,0,z_data,6,16);
-			z_data = GetData(MPU_GYRO_YOUTH_REG);
-			if(z_data<0)
-				z_data = -z_data;
-			OLED_ShowNum(54,2,z_data,6,16);
-			z_data = GetData(MPU_TEMP_OUTH_REG);
-			if(z_data<0)
-				z_data = -z_data;
-			OLED_ShowNum(0,2,z_data,6,16);
+			PWMVAL = get_pwmval_with_pid(t12adc_val,adc_want,2000);
+			OLED_ShowNum(0,0,adc2tempval(t12adc_val),5,16);
 			
 			if(KEY1_DOWN)
 			{
+				OLED_ShowNum(54,0,temp_want+=KEY1_DOWN,6,16);
 				KEY1_DOWN = 0;
-				OLED_ShowNum(54,0,kes++,6,16);
 			}
 			if(KEY2_DOWN)
 			{
+				OLED_ShowNum(54,0,temp_want-=KEY2_DOWN,6,16);
 				KEY2_DOWN = 0;
-				
 			}
-			
 			systime++;
 		}
 	}
@@ -111,13 +114,13 @@ void gpio_init(void)
 	P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED  SWITCH
 	P3M1 &= ~(3<<5);
 	
-	P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC
+	P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
 	P1M1 |= (3<<4);
 	
 	P1M0 &= ~(3<<0);   //设置 P1.0  P1.1为高阻输入   ADC
 	P1M1 |= (3<<0);
 	
-	P3M0 &= ~(3<<2);    //设置 P3.2  P3.3为双向口模式   KEY
+	P3M0 &= ~(3<<2);    //设置 P3.2  P3.3为准双向模式   KEY
 	P3M1 &= ~(3<<2);
 	
 	KEY1=1;
@@ -150,7 +153,34 @@ u16 ADC_get_val(u8 channel)
 }
 
 
-#define PVAL  15.0F
+u16 temp2adcval(u16 temperature)
+{
+	u8 i=0;
+	
+	for(i=0;i<TEMPMAPNUM-1;i++)
+	{
+		if(temperature>=temp_map[i].temp&&temperature<temp_map[i+1].temp)
+		{
+			return temp_map[i].k*temperature+temp_map[i].b;
+		}
+	}
+}
+
+u16 adc2tempval(u16 adcval)
+{
+	u8 i=0;
+	
+	for(i=0;i<TEMPMAPNUM-1;i++)
+	{
+		if(adcval>=temp_map[i].adc&&adcval<temp_map[i+1].adc)
+		{
+			return (adcval-temp_map[i].b)/temp_map[i].k;
+		}
+	}
+}
+
+
+#define PVAL  20.0F
 #define IVAL  0.0F
 #define DVAL  0.0F
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
@@ -179,24 +209,24 @@ void Timer0_Isr(void) interrupt 1
 	}else{
 		_K2=0;
 	}
-	if(_K1>120)
+	if(_K1>70)
 	{
 		_K1=0;
-		KEY1_DOWN=1;
+		KEY1_DOWN+=1;
 	}
-	if(_K2>120)
+	if(_K2>70)
 	{
 		_K2=0;
-		KEY2_DOWN=1;
+		KEY2_DOWN+=1;
 	}
 }
 
-void Timer0_Init(void)		//1000微秒@24.000MHz
+void Timer0_Init(void)		//1000微秒@40.000MHz
 {
 	AUXR |= 0x80;			//定时器时钟1T模式
 	TMOD &= 0xF0;			//设置定时器模式
-	TL0 = 0x40;				//设置定时初始值
-	TH0 = 0xA2;				//设置定时初始值
+	TL0 = 0xC0;				//设置定时初始值
+	TH0 = 0x63;				//设置定时初始值
 	TF0 = 0;				//清除TF0标志
 	TR0 = 1;				//定时器0开始计时
 	ET0 = 1;				//使能定时器0中断
