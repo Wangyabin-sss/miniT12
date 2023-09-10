@@ -3,6 +3,7 @@
         {
             "name": "I2C",
             "includePath": [
+                "D:\\Keil_v5\\C51\\INC",
                 "c:\\Users\\SmartWsn\\Downloads\\STC8H8K64U-DEMO-CODE\\myproject\\T12"
             ],
             "defines": [

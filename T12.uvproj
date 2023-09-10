@@ -377,11 +377,6 @@
           <GroupName>Source</GroupName>
           <Files>
             <File>
-              <FileName>功能说明.txt</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\功能说明.txt</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\main.c</FilePath>

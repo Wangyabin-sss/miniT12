@@ -24,6 +24,7 @@ static struct temperature_map{
 }temp_map[TEMPMAPNUM] = {{0,0},{50,100},{100,200},{150,300},{200,400},{250,500},{300,600},{350,750},{400,800},{450,850}};
 	
 
+
 void gpio_init(void);
 void ADC_init(void);
 u16 ADC_get_val(u8 channel);
@@ -38,7 +39,7 @@ int main()
 	float powerval=0;
 	u16 pwmtime = 0;
 	u16 systime = 0;
-	u32 t12adc_val = 0;
+	u32 t12adc_val[6] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;
 	u16 temp_want = 350,adc_want;
 	s16 mpu_data=0;
 	u8 i;
@@ -57,6 +58,8 @@ int main()
 	
 	EA = 1;
 	SWITCH = 0;
+
+	OLED_ShowNum(54,0,temp_want,6,16);
 	
 	while(1)
 	{
@@ -84,12 +87,28 @@ int main()
 			//获取mpu6050是否运动
 			mpu_data = GetData(MPU_GYRO_XOUTH_REG);
 			
+			//根据设定的温度转adc值
 			adc_want = temp2adcval(temp_want);
 			//计算运算放大器输出电压
-			t12adc_val = ADC_get_val(0);
-			t12adc_val = (t12adc_val*3300)/4096;
-			PWMVAL = get_pwmval_with_pid(t12adc_val,adc_want,2000);
-			OLED_ShowNum(0,0,adc2tempval(t12adc_val),5,16);
+			t12adc_val[t12adc_i] = ADC_get_val(0);
+			t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
+			t12adc_i++;
+			if(t12adc_i==6)
+				t12adc_i = 0;
+			t12adc_max=t12adc_val[0];
+			t12adc_min=t12adc_val[0];
+			t12adc_all = 0;
+			for(i=0;i<6;i++)
+			{
+				if(t12adc_val[i]<t12adc_min)
+					t12adc_min = t12adc_val[i];
+				if(t12adc_val[i]>t12adc_max)
+					t12adc_max = t12adc_val[i];
+				t12adc_all += t12adc_val[i];
+			}
+			t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/4.0f;
+			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2000);
+			OLED_ShowNum(0,0,adc2tempval(t12adc_average),5,16);
 			
 			if(KEY1_DOWN)
 			{

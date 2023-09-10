@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 15:43:09 PAGE 1   
+C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 16:10:53 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE IIC
@@ -62,7 +62,7 @@ line level    source
   52   1              {
   53   2                      time++;
   54   2                      if(time>250*5)
-C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 15:43:09 PAGE 2   
+C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 16:10:53 PAGE 2   
 
   55   2                      {
   56   3                              //I2C_Stop();
@@ -126,7 +126,7 @@ line level    source
  114   1              I2C_SendByte(0x78);
  115   1              I2C_RecvACK();
  116   1              if(mode){I2C_SendByte(0x40);}
-C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 15:43:09 PAGE 3   
+C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 16:10:53 PAGE 3   
 
  117   1              else{I2C_SendByte(0x00);}
  118   1              I2C_RecvACK();
@@ -190,7 +190,7 @@ line level    source
  176          {
  177   1              OLED_WR_Byte(0X8D,OLED_CMD);  //SET DCDC命令
  178   1              OLED_WR_Byte(0X14,OLED_CMD);  //DCDC ON
-C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 15:43:09 PAGE 4   
+C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 16:10:53 PAGE 4   
 
  179   1              OLED_WR_Byte(0XAF,OLED_CMD);  //DISPLAY ON
  180   1      }
@@ -254,7 +254,7 @@ line level    source
  238          //len :数字的位数
  239          //sizey:字体大小                  
  240          void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 sizey)
-C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 15:43:09 PAGE 5   
+C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 16:10:53 PAGE 5   
 
  241          {               
  242   1              u8 t,temp,m=0;
@@ -318,7 +318,7 @@ line level    source
  300   2              }
  301   1      } 
  302          
-C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 15:43:09 PAGE 6   
+C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 16:10:53 PAGE 6   
 
  303          
  304          void SSD1306_WRITECOMMAND(u8 dat)
@@ -382,7 +382,7 @@ line level    source
              -0xc8正常
  361   1          SSD1306_WRITECOMMAND(0x81); // Set contrast control for BANK0
  362   1          SSD1306_WRITECOMMAND(0x7F); // -- range 0x00 to 0xFF => 50%
-C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 15:43:09 PAGE 7   
+C51 COMPILER V9.60.7.0   IIC                                                               09/10/2023 16:10:53 PAGE 7   
 
  363   1          SSD1306_WRITECOMMAND(0xA4); // Enable display outputs according to the GDDRAM contents.
  364   1          SSD1306_WRITECOMMAND(0xA6); // Set normal display
