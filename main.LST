@@ -1,9 +1,10 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:36:39 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:43:09 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
-OBJECT MODULE PLACED IN main.OBJ
-COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND
+OBJECT MODULE PLACED IN .\outputs\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND OBJECT(.\output
+                    -s\main.obj)
 
 line level    source
 
@@ -61,9 +62,9 @@ line level    source
   51   1              
   52   1              gpio_init();
   53   1              OLED_Init();
-  54   1              ADC_init();
-C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:36:39 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:43:09 PAGE 2   
 
+  54   1              ADC_init();
   55   1              Timer0_Init();
   56   1              InitMPU6050();
   57   1              
@@ -125,9 +126,9 @@ line level    source
  113   1              
  114   1              P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED  SWITCH
  115   1              P3M1 &= ~(3<<5);
- 116   1              
-C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:36:39 PAGE 3   
+C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:43:09 PAGE 3   
 
+ 116   1              
  117   1              P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
  118   1              P1M1 |= (3<<4);
  119   1              
@@ -189,9 +190,9 @@ line level    source
  175   2                      if(adcval>=temp_map[i].adc&&adcval<temp_map[i+1].adc)
  176   2                      {
  177   3                              return (adcval-temp_map[i].b)/temp_map[i].k;
- 178   3                      }
-C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:36:39 PAGE 4   
+C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:43:09 PAGE 4   
 
+ 178   3                      }
  179   2              }
  180   1      }
  181          
@@ -253,9 +254,9 @@ line level    source
 *** WARNING C291 IN LINE 180 OF main.c: not every exit path returns a value
 
 
-MODULE INFORMATION:   STATIC OVERLAYABLE
-C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:36:39 PAGE 5   
+C51 COMPILER V9.60.7.0   MAIN                                                              09/10/2023 15:43:09 PAGE 5   
 
+MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =   1525    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =    124      37

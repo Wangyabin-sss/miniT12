@@ -1,0 +1,6 @@
+".\outputs\main.obj",
+".\outputs\iic.obj",
+".\outputs\sys.obj",
+".\outputs\mpu6050.obj" 
+TO ".\outputs\T12" 
+PRINT(".\T12.m51") RAMSIZE(256) 

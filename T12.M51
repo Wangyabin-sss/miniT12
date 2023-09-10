@@ -1,18 +1,19 @@
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                    09/10/2023  15:36:39  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                    09/10/2023  15:43:09  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22.4.0, INVOKED BY:
-D:\KEIL_V5\C51\BIN\BL51.EXE main.obj, iic.obj, sys.obj, mpu6050.obj TO T12 RAMSIZE (256)
+D:\KEIL_V5\C51\BIN\BL51.EXE .\outputs\main.obj, .\outputs\iic.obj, .\outputs\sys.obj, .\outputs\mpu6050.obj TO .\outputs
+>> \T12 PRINT (.\T12.m51) RAMSIZE (256)
 
 
 MEMORY MODEL: LARGE WITH FLOATING POINT ARITHMETIC
 
 
 INPUT MODULES INCLUDED:
-  main.obj (MAIN)
-  iic.obj (IIC)
-  sys.obj (SYS)
-  mpu6050.obj (MPU6050)
+  .\outputs\main.obj (MAIN)
+  .\outputs\iic.obj (IIC)
+  .\outputs\sys.obj (SYS)
+  .\outputs\mpu6050.obj (MPU6050)
   D:\KEIL_V5\C51\LIB\C51FPL.LIB (?C?FPADD)
   D:\KEIL_V5\C51\LIB\C51FPL.LIB (?C?FPMUL)
   D:\KEIL_V5\C51\LIB\C51FPL.LIB (?C?FPDIV)
@@ -35,7 +36,7 @@ INPUT MODULES INCLUDED:
   D:\KEIL_V5\C51\LIB\C51L.LIB (?C_INIT)
 
 
-LINK MAP OF MODULE:  T12 (MAIN)
+LINK MAP OF MODULE:  .\outputs\T12 (MAIN)
 
 
             TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
@@ -58,10 +59,10 @@ LINK MAP OF MODULE:  T12 (MAIN)
             XDATA   00C7H     0001H     UNIT         ?XD?_OLED_DISPLAYTURN?IIC
 
             * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 2
+
+
             CODE    0000H     0003H     ABSOLUTE     
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 2
-
-
             CODE    0003H     0005H     UNIT         ?PR?_SSD1306_WRITECOMMAND?IIC
                     0008H     0003H                  *** GAP ***
             CODE    000BH     0003H     ABSOLUTE     
@@ -111,17 +112,17 @@ LINK MAP OF MODULE:  T12 (MAIN)
 
 
 
-OVERLAY MAP OF MODULE:   T12 (MAIN)
+OVERLAY MAP OF MODULE:   .\outputs\T12 (MAIN)
 
 
 SEGMENT                                   BIT_GROUP          XDATA_GROUP
   +--> CALLED SEGMENT                  START    LENGTH     START    LENGTH
 --------------------------------------------------------------------------
 ?C_C51STARTUP                          -----    -----      -----    -----
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 3
+
+
   +--> ?PR?MAIN?MAIN
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 3
-
-
   +--> ?C_INITSEG
 
 ?PR?MAIN?MAIN                          -----    -----      007CH    0015H
@@ -178,10 +179,10 @@ SEGMENT                                   BIT_GROUP          XDATA_GROUP
 ?PR?_MPU_WRITE_BYTE?MPU6050            -----    -----      0094H    0002H
   +--> ?PR?I2C_START?IIC
   +--> ?PR?_I2C_SENDBYTE?IIC
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 4
+
+
   +--> ?PR?I2C_RECVACK?IIC
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 4
-
-
   +--> ?PR?I2C_STOP?IIC
 
 ?PR?_MPU_SET_GYRO_FSR?MPU6050          -----    -----      -----    -----
@@ -236,12 +237,12 @@ SEGMENT                                   BIT_GROUP          XDATA_GROUP
 
 
 
-SYMBOL TABLE OF MODULE:  T12 (MAIN)
+SYMBOL TABLE OF MODULE:  .\outputs\T12 (MAIN)
+
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 5
+
 
   VALUE           TYPE          NAME
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 5
-
-
   ----------------------------------
 
   -------         MODULE        MAIN
@@ -298,10 +299,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   C:1405H         PUBLIC        _get_pwmval_with_pid
   -------         PROC          MAIN
   -------         DO            
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 6
+
+
   X:007CH         SYMBOL        PWMVAL
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 6
-
-
   X:007EH         SYMBOL        powerval
   X:0082H         SYMBOL        pwmtime
   X:0084H         SYMBOL        systime
@@ -358,10 +359,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   C:113FH         LINE#         90
   C:1166H         LINE#         91
   C:1187H         LINE#         92
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 7
+
+
   C:11ADH         LINE#         94
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 7
-
-
   C:11B4H         LINE#         95
   C:11B4H         LINE#         96
   C:11DCH         LINE#         97
@@ -418,10 +419,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   -------         ENDPROC       _ADC_GET_VAL
   -------         PROC          _TEMP2ADCVAL
   X:0091H         SYMBOL        temperature
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 8
+
+
   -------         DO            
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 8
-
-
   X:0093H         SYMBOL        i
   -------         ENDDO         
   C:14DAH         LINE#         156
@@ -478,10 +479,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   -------         PROC          TIMER0_ISR
   C:1AF4H         LINE#         200
   C:1AFCH         LINE#         202
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 9
+
+
   C:1B02H         LINE#         203
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 9
-
-
   C:1B05H         LINE#         204
   C:1B07H         LINE#         205
   C:1B09H         LINE#         206
@@ -538,10 +539,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   C:1C2AH         PUBLIC        _OLED_WR_Byte
   C:0003H         PUBLIC        _SSD1306_WRITECOMMAND
   C:122AH         PUBLIC        _OLED_ShowChar
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 10
+
+
   C:0826H         PUBLIC        Hzk
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 10
-
-
   C:1E08H         PUBLIC        I2C_Start
   C:1DD3H         PUBLIC        _OLED_ColorTurn
   D:0098H         PUBLIC        SCON
@@ -598,10 +599,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   -------         ENDDO         
   C:1C5DH         LINE#         44
   C:1C5DH         LINE#         45
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 11
+
+
   C:1C5DH         LINE#         46
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 11
-
-
   C:1C64H         LINE#         47
   C:1C66H         LINE#         48
   C:1C6CH         LINE#         49
@@ -658,10 +659,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   C:1AB8H         LINE#         99
   C:1ABBH         LINE#         100
   C:1AD2H         LINE#         101
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 12
+
+
   C:1AD9H         LINE#         102
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 12
-
-
   C:1AE7H         LINE#         103
   C:1AEEH         LINE#         104
   C:1AF3H         LINE#         105
@@ -718,10 +719,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   -------         PROC          _OLED_SET_POS
   X:00A7H         SYMBOL        x
   D:0005H         SYMBOL        y
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 13
+
+
   C:1CDBH         LINE#         168
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 13
-
-
   C:1CE0H         LINE#         169
   C:1CE0H         LINE#         170
   C:1CE9H         LINE#         171
@@ -778,10 +779,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   C:128DH         LINE#         214
   C:1298H         LINE#         215
   C:12B5H         LINE#         216
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 14
+
+
   C:12B5H         LINE#         217
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 14
-
-
   C:12D1H         LINE#         218
   C:12F2H         LINE#         219
   C:1314H         LINE#         222
@@ -838,10 +839,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   X:00C1H         SYMBOL        chr
   X:00C4H         SYMBOL        sizey
   -------         DO            
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 15
+
+
   X:00C5H         SYMBOL        j
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 15
-
-
   -------         ENDDO         
   C:190DH         LINE#         260
   C:191EH         LINE#         261
@@ -898,10 +899,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   C:17EBH         LINE#         300
   C:17F3H         LINE#         301
   -------         ENDPROC       _OLED_DRAWBMP
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 16
+
+
   -------         PROC          _SSD1306_WRITECOMMAND
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 16
-
-
   D:0007H         SYMBOL        dat
   C:0003H         LINE#         304
   C:0003H         LINE#         305
@@ -958,10 +959,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   D:00B8H         PUBLIC        IP
   D:0098H         PUBLIC        SCON
   D:0088H         PUBLIC        TCON
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 17
+
+
   C:1E1FH         PUBLIC        _delay_ms
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 17
-
-
   C:1E60H         PUBLIC        _delay_us
   D:00D0H         PUBLIC        PSW
   -------         PROC          _DELAY_MS
@@ -1018,10 +1019,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   X:0095H         SYMBOL        REG_data
   C:1D06H         LINE#         7
   C:1D0EH         LINE#         8
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 18
+
+
   C:1D0EH         LINE#         9
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 18
-
-
   C:1D11H         LINE#         10
   C:1D16H         LINE#         11
   C:1D19H         LINE#         12
@@ -1078,10 +1079,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   C:1BB2H         LINE#         64
   C:1BBFH         LINE#         65
   C:1BCCH         LINE#         66
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 19
+
+
   C:1BCEH         LINE#         67
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 19
-
-
   -------         ENDPROC       _MPU_SET_LPF
   -------         PROC          _MPU_SET_RATE
   X:0091H         SYMBOL        rate
@@ -1138,10 +1139,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
   -------         ENDMOD        MPU6050
 
   -------         MODULE        ?C?FPADD
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 20
+
+
   C:090DH         PUBLIC        ?C?FPADD
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 20
-
-
   C:0909H         PUBLIC        ?C?FPSUB
   -------         ENDMOD        ?C?FPADD
 
@@ -1198,10 +1199,10 @@ SYMBOL TABLE OF MODULE:  T12 (MAIN)
 
   -------         MODULE        ?C?ULDIV
   C:0E38H         PUBLIC        ?C?ULDIV
+BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:43:09  PAGE 21
+
+
   -------         ENDMOD        ?C?ULDIV
-BL51 BANKED LINKER/LOCATER V6.22.4.0                                                  09/10/2023  15:36:39  PAGE 21
-
-
 
   -------         MODULE        ?C?LNEG
   C:0ECAH         PUBLIC        ?C?LNEG
