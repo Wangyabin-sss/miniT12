@@ -21,9 +21,18 @@ static struct temperature_map{
 	int adc;
 	float k;
 	float b;
-}temp_map[TEMPMAPNUM] = {{0,0},{50,100},{100,200},{150,300},{200,400},{250,500},{300,600},{350,750},{400,800},{450,850}};
+}temp_map[TEMPMAPNUM] = {{0,0},
+						{50,100},
+						{100,200},
+						{150,300},
+						{200,400},
+						{250,500},
+						{300,600},
+						{350,750},
+						{400,800},
+						{450,850}};
 	
-
+#define ADCARRAYNUM 6
 
 void gpio_init(void);
 void ADC_init(void);
@@ -38,10 +47,9 @@ int main()
 	u16 PWMVAL = 0;
 	float powerval=0;
 	u16 pwmtime = 0;
-	u16 systime = 0;
-	u32 t12adc_val[6] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;
+	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波
 	u16 temp_want = 350,adc_want;
-	s16 mpu_data=0;
+	s16 mpu_data=0,mpu_diff=0,mpu_time=0;
 	u8 i;
 	
 	for(i=0;i<TEMPMAPNUM-1;i++)
@@ -59,7 +67,9 @@ int main()
 	EA = 1;
 	SWITCH = 0;
 
-	OLED_ShowNum(54,0,temp_want,6,16);
+	OLED_ShowString(72,0,"Set:",8);
+	OLED_ShowString(72,1,"Pow:",8);
+	OLED_ShowNum(102,0,temp_want,3,8);
 	
 	while(1)
 	{
@@ -75,30 +85,29 @@ int main()
 		}
 		delay_us(50);
 		pwmtime++;
-		if(pwmtime==2004)  //50*2000=100000us = 100ms周期
+		if(pwmtime==2001)  //50*2000=100000us = 100ms周期
 		{
 			pwmtime = 0;
 			//计算当前电源电压并显示
 			powerval = ADC_get_val(1);
 			powerval = (powerval*3300)/4096;
 			powerval = powerval/10000*100;
-			OLED_ShowNum(0,2,powerval*10,5,16);
+			OLED_ShowNum(102,1,powerval*10,3,8);
 			
-			//获取mpu6050是否运动
-			mpu_data = GetData(MPU_GYRO_XOUTH_REG);
-			
+			//获取mpu6050数据
+			if((2000-PWMVAL)>800)
+			{
+				mpu_data = GetData(MPU_GYRO_XOUTH_REG);
+			}
+
 			//根据设定的温度转adc值
 			adc_want = temp2adcval(temp_want);
-			//计算运算放大器输出电压
-			t12adc_val[t12adc_i] = ADC_get_val(0);
-			t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
-			t12adc_i++;
-			if(t12adc_i==6)
-				t12adc_i = 0;
+
+			//adc滤波数组去掉最大最小值，求均值
 			t12adc_max=t12adc_val[0];
 			t12adc_min=t12adc_val[0];
 			t12adc_all = 0;
-			for(i=0;i<6;i++)
+			for(i=0;i<ADCARRAYNUM;i++)
 			{
 				if(t12adc_val[i]<t12adc_min)
 					t12adc_min = t12adc_val[i];
@@ -106,21 +115,28 @@ int main()
 					t12adc_max = t12adc_val[i];
 				t12adc_all += t12adc_val[i];
 			}
-			t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/4.0f;
+			t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
 			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2000);
-			OLED_ShowNum(0,0,adc2tempval(t12adc_average),5,16);
+			OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
+
+			//计算运算放大器输出电压，填充数组
+			t12adc_val[t12adc_i] = ADC_get_val(0);
+			t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
+			t12adc_i++;
+			if(t12adc_i==ADCARRAYNUM)
+				t12adc_i = 0;
 			
+			//按键检测
 			if(KEY1_DOWN)
 			{
-				OLED_ShowNum(54,0,temp_want+=KEY1_DOWN,6,16);
+				OLED_ShowNum(102,0,temp_want+=KEY1_DOWN,3,8);
 				KEY1_DOWN = 0;
 			}
 			if(KEY2_DOWN)
 			{
-				OLED_ShowNum(54,0,temp_want-=KEY2_DOWN,6,16);
+				OLED_ShowNum(102,0,temp_want-=KEY2_DOWN,3,8);
 				KEY2_DOWN = 0;
 			}
-			systime++;
 		}
 	}
 }

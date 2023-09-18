@@ -261,7 +261,7 @@ void OLED_ShowString(u8 x,u8 y,u8 *chr,u8 sizey)
 {
 	u8 j=0;
 	while (chr[j]!='\0')
-	{		
+	{
 		OLED_ShowChar(x,y,chr[j++],sizey);
 		if(sizey==8)x+=6;
 		else x+=sizey/2;
