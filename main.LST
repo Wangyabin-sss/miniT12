@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              01/31/2024 15:03:03 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -58,11 +58,11 @@ line level    source
   48   1              float powerval=0;
   49   1              u16 pwmtime = 0;
   50   1              u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //ad
-             -c均值滤波
+             -c均值滤波  adc电压单位mV
   51   1              u16 temp_want = 350,adc_want;
   52   1              s16 mpu_data=0,mpu_diff=0,mpu_time=0,mpu_temp;
   53   1              u8 i;
-C51 COMPILER V9.60.7.0   MAIN                                                              01/31/2024 15:03:03 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 2   
 
   54   1              
   55   1      INITRESET:
@@ -86,230 +86,226 @@ line level    source
   73   1              OLED_ShowString(72,2,"Tmp:",8);
   74   1              OLED_ShowNum(102,0,temp_want,3,8);
   75   1              
-  76   1              for(i=0;i<5;i++)
-  77   1              {
-  78   2                      mpu_temp = MPU_Get_Temperature();
-  79   2                      delay_ms(1);
-  80   2              }
-  81   1              
-  82   1              OLED_ShowNum(102,2,mpu_temp,3,8);
-  83   1              
-  84   1              while(1)
-  85   1              {
-  86   2                      if(pwmtime<PWMVAL)
+  76   1              
+  77   1              OLED_ShowNum(102,2,mpu_temp,3,8);
+  78   1              
+  79   1              while(1)
+  80   1              {
+  81   2                      if(pwmtime<PWMVAL)
+  82   2                      {
+  83   3                              SWITCH = 1;
+  84   3                              LED = 0;
+  85   3                      }
+  86   2                      else
   87   2                      {
-  88   3                              SWITCH = 1;
-  89   3                              LED = 0;
+  88   3                              SWITCH = 0;
+  89   3                              LED = 1;
   90   3                      }
-  91   2                      else
-  92   2                      {
-  93   3                              SWITCH = 0;
-  94   3                              LED = 1;
-  95   3                      }
-  96   2                      delay_us(50);
-  97   2                      pwmtime++;
-  98   2                      if(pwmtime==2501)  //50*2500=125000us = 125ms周期
-  99   2                      {
- 100   3                              pwmtime = 0;
- 101   3                              //计算当前电源电压并显示
- 102   3                              powerval = ADC_get_val(1);
- 103   3                              powerval = (powerval*3300)/4096;
- 104   3                              powerval = powerval/10000*100;
- 105   3                              OLED_ShowNum(102,1,powerval*10,3,8);
- 106   3                              
- 107   3                              //根据空闲加热时间获取mpu6050数据
- 108   3                              if((2500-PWMVAL)>600)
- 109   3                              {
- 110   4                                      mpu_data = GetData(MPU_GYRO_XOUTH_REG);
- 111   4                                      mpu_temp = MPU_Get_Temperature();
- 112   4                              }
- 113   3      
- 114   3                              //根据设定的温度转adc值
- 115   3                              adc_want = temp2adcval(temp_want);
-C51 COMPILER V9.60.7.0   MAIN                                                              01/31/2024 15:03:03 PAGE 3   
+  91   2                      delay_us(50);
+  92   2                      pwmtime++;
+  93   2                      if(pwmtime==2501)  //50*2500=125000us = 125ms周期
+  94   2                      {
+  95   3                              pwmtime = 0;
+  96   3                              mpu_data = GetData(MPU_GYRO_XOUTH_REG);
+  97   3                              
+  98   3                              //非全速加热时获取当前电压与mpu6050温度数据
+  99   3                              if((2500-PWMVAL)>800)
+ 100   3                              {
+ 101   4                                      //计算当前电源电压并显示
+ 102   4                                      powerval = ADC_get_val(1);
+ 103   4                                      powerval = (powerval*3300)/4096;
+ 104   4                                      powerval = powerval/10000*100;
+ 105   4                                      OLED_ShowNum(102,1,powerval*10,3,8);
+ 106   4                                      mpu_temp = MPU_Get_Temperature();
+ 107   4                                      OLED_ShowNum(102,2,mpu_temp,3,8);
+ 108   4                              }
+ 109   3      
+ 110   3                              //根据设定的温度获取T12热电偶电压值（adc值）
+ 111   3                              adc_want = temp2adcval(temp_want);
+ 112   3      
+ 113   3                              //adc滤波数组去掉最大最小值，求均值
+ 114   3                              t12adc_max=t12adc_val[0];
+ 115   3                              t12adc_min=t12adc_val[0];
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 3   
 
- 116   3      
- 117   3                              //adc滤波数组去掉最大最小值，求均值
- 118   3                              t12adc_max=t12adc_val[0];
- 119   3                              t12adc_min=t12adc_val[0];
- 120   3                              t12adc_all = 0;
- 121   3                              for(i=0;i<ADCARRAYNUM;i++)
- 122   3                              {
- 123   4                                      if(t12adc_val[i]<t12adc_min)
- 124   4                                              t12adc_min = t12adc_val[i];
- 125   4                                      if(t12adc_val[i]>t12adc_max)
- 126   4                                              t12adc_max = t12adc_val[i];
- 127   4                                      t12adc_all += t12adc_val[i];
- 128   4                              }
- 129   3                              t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
- 130   3                              PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
- 131   3                              OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
- 132   3      
- 133   3                              //计算运算放大器输出电压，填充数组
- 134   3                              t12adc_val[t12adc_i] = ADC_get_val(0);
- 135   3                              t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
- 136   3                              t12adc_i++;
- 137   3                              if(t12adc_i==ADCARRAYNUM)
- 138   3                                      t12adc_i = 0;
- 139   3                              
- 140   3                              //按键检测
- 141   3                              if(KEY1_DOWN&&KEY2_DOWN)
- 142   3                              {
- 143   4                                      KEY1_DOWN = 0;
- 144   4                                      KEY2_DOWN = 0;
- 145   4                                      goto INITRESET;
- 146   4                              }
- 147   3                              if(KEY1_DOWN)
- 148   3                              {
- 149   4                                      OLED_ShowNum(102,0,temp_want+=KEY1_DOWN,3,8);
- 150   4                                      KEY1_DOWN = 0;
- 151   4                              }
- 152   3                              if(KEY2_DOWN)
- 153   3                              {
- 154   4                                      OLED_ShowNum(102,0,temp_want-=KEY2_DOWN,3,8);
- 155   4                                      KEY2_DOWN = 0;
- 156   4                              }
- 157   3                      }
- 158   2              }
- 159   1      }
- 160          
- 161          
- 162          void gpio_init(void)
- 163          {
- 164   1              P_SW2 |= 0x80;     //使能访问 XFR
- 165   1              
- 166   1              P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED  SWITCH
- 167   1              P3M1 &= ~(3<<5);
- 168   1              
- 169   1              P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
- 170   1              P1M1 |= (3<<4);
- 171   1              
- 172   1              P1M0 &= ~(3<<0);   //设置 P1.0  P1.1为高阻输入   ADC
- 173   1              P1M1 |= (3<<0);
- 174   1              
- 175   1              P3M0 &= ~(3<<2);    //设置 P3.2  P3.3为准双向模式   KEY
- 176   1              P3M1 &= ~(3<<2);
- 177   1              
-C51 COMPILER V9.60.7.0   MAIN                                                              01/31/2024 15:03:03 PAGE 4   
+ 116   3                              t12adc_all = 0;
+ 117   3                              for(i=0;i<ADCARRAYNUM;i++)
+ 118   3                              {
+ 119   4                                      if(t12adc_val[i]<t12adc_min)
+ 120   4                                              t12adc_min = t12adc_val[i];
+ 121   4                                      if(t12adc_val[i]>t12adc_max)
+ 122   4                                              t12adc_max = t12adc_val[i];
+ 123   4                                      t12adc_all += t12adc_val[i];
+ 124   4                              }
+ 125   3                              t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
+ 126   3                              PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
+ 127   3                              OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
+ 128   3      
+ 129   3                              //计算运算放大器输出电压，填充数组
+ 130   3                              t12adc_val[t12adc_i] = ADC_get_val(0);
+ 131   3                              t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
+ 132   3                              t12adc_i++;
+ 133   3                              if(t12adc_i==ADCARRAYNUM)
+ 134   3                                      t12adc_i = 0;
+ 135   3                              
+ 136   3                              //按键检测
+ 137   3                              if(KEY1_DOWN&&KEY2_DOWN)
+ 138   3                              {
+ 139   4                                      KEY1_DOWN = 0;
+ 140   4                                      KEY2_DOWN = 0;
+ 141   4                                      goto INITRESET;
+ 142   4                              }
+ 143   3                              if(KEY1_DOWN)
+ 144   3                              {
+ 145   4                                      OLED_ShowNum(102,0,temp_want+=KEY1_DOWN,3,8);
+ 146   4                                      KEY1_DOWN = 0;
+ 147   4                              }
+ 148   3                              if(KEY2_DOWN)
+ 149   3                              {
+ 150   4                                      OLED_ShowNum(102,0,temp_want-=KEY2_DOWN,3,8);
+ 151   4                                      KEY2_DOWN = 0;
+ 152   4                              }
+ 153   3                      }
+ 154   2              }
+ 155   1      }
+ 156          
+ 157          
+ 158          void gpio_init(void)
+ 159          {
+ 160   1              P_SW2 |= 0x80;     //使能访问 XFR
+ 161   1              
+ 162   1              P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED  SWITCH
+ 163   1              P3M1 &= ~(3<<5);
+ 164   1              
+ 165   1              P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
+ 166   1              P1M1 |= (3<<4);
+ 167   1              
+ 168   1              P1M0 &= ~(3<<0);   //设置 P1.0  P1.1为高阻输入   ADC
+ 169   1              P1M1 |= (3<<0);
+ 170   1              
+ 171   1              P3M0 &= ~(3<<2);    //设置 P3.2  P3.3为准双向模式   KEY
+ 172   1              P3M1 &= ~(3<<2);
+ 173   1              
+ 174   1              KEY1=1;
+ 175   1              KEY2=1;
+ 176   1              SCL=1;
+ 177   1              SDA=1;
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 4   
 
- 178   1              KEY1=1;
- 179   1              KEY2=1;
- 180   1              SCL=1;
- 181   1              SDA=1;
- 182   1      }
- 183          
- 184          void ADC_init(void)
- 185          {
- 186   1              ADCTIM = 0x3f;//设置 ADC 内部时序
- 187   1              ADCCFG = 0x0f;//设置 ADC 时钟为系统时钟/2/16
- 188   1              ADC_CONTR = 0x80;//使能 ADC 模块
- 189   1      }
- 190          
- 191          
- 192          u16 ADC_get_val(u8 channel)
- 193          {
- 194   1              ADC_CONTR |= 0x40;        //启动 AD 转换
- 195   1              
- 196   1              ADC_CONTR &= ~(0xf);
- 197   1              ADC_CONTR |= channel;
- 198   1              
- 199   1              _nop_();
- 200   1              _nop_();
- 201   1              while (!(ADC_CONTR & 0x20));//查询 ADC 完成标志
- 202   1              ADC_CONTR &= ~0x20;         //清完成标志
- 203   1              P2 = ADC_RES;               //读取 ADC 结果
- 204   1              return (ADC_RES<<4)|(ADC_RESL>>4);
- 205   1      }
- 206          
- 207          
- 208          u16 temp2adcval(u16 temperature)
- 209          {
- 210   1              u8 i=0;
- 211   1              
- 212   1              for(i=0;i<TEMPMAPNUM-1;i++)
- 213   1              {
- 214   2                      if(temperature>=temp_map[i].temp&&temperature<temp_map[i+1].temp)
- 215   2                      {
- 216   3                              return temp_map[i].k*temperature+temp_map[i].b;
- 217   3                      }
- 218   2              }
- 219   1      }
- 220          
- 221          u16 adc2tempval(u16 adcval)
- 222          {
- 223   1              u8 i=0;
- 224   1              
- 225   1              for(i=0;i<TEMPMAPNUM-1;i++)
- 226   1              {
- 227   2                      if(adcval>=temp_map[i].adc&&adcval<temp_map[i+1].adc)
- 228   2                      {
- 229   3                              return (adcval-temp_map[i].b)/temp_map[i].k;
- 230   3                      }
- 231   2              }
- 232   1      }
- 233          
- 234          
- 235          #define PVAL  20.0F
- 236          #define IVAL  0.0F
- 237          #define DVAL  0.0F
- 238          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
- 239          {
-C51 COMPILER V9.60.7.0   MAIN                                                              01/31/2024 15:03:03 PAGE 5   
+ 178   1      }
+ 179          
+ 180          void ADC_init(void)
+ 181          {
+ 182   1              ADCTIM = 0x3f;//设置 ADC 内部时序
+ 183   1              ADCCFG = 0x0f;//设置 ADC 时钟为系统时钟/2/16
+ 184   1              ADC_CONTR = 0x80;//使能 ADC 模块
+ 185   1      }
+ 186          
+ 187          
+ 188          u16 ADC_get_val(u8 channel)
+ 189          {
+ 190   1              ADC_CONTR |= 0x40;        //启动 AD 转换
+ 191   1              
+ 192   1              ADC_CONTR &= ~(0xf);
+ 193   1              ADC_CONTR |= channel;
+ 194   1              
+ 195   1              _nop_();
+ 196   1              _nop_();
+ 197   1              while (!(ADC_CONTR & 0x20));//查询 ADC 完成标志
+ 198   1              ADC_CONTR &= ~0x20;         //清完成标志
+ 199   1              P2 = ADC_RES;               //读取 ADC 结果
+ 200   1              return (ADC_RES<<4)|(ADC_RESL>>4);
+ 201   1      }
+ 202          
+ 203          
+ 204          u16 temp2adcval(u16 temperature)
+ 205          {
+ 206   1              u8 i=0;
+ 207   1              
+ 208   1              for(i=0;i<TEMPMAPNUM-1;i++)
+ 209   1              {
+ 210   2                      if(temperature>=temp_map[i].temp&&temperature<temp_map[i+1].temp)
+ 211   2                      {
+ 212   3                              return temp_map[i].k*temperature+temp_map[i].b;
+ 213   3                      }
+ 214   2              }
+ 215   1      }
+ 216          
+ 217          u16 adc2tempval(u16 adcval)
+ 218          {
+ 219   1              u8 i=0;
+ 220   1              
+ 221   1              for(i=0;i<TEMPMAPNUM-1;i++)
+ 222   1              {
+ 223   2                      if(adcval>=temp_map[i].adc&&adcval<temp_map[i+1].adc)
+ 224   2                      {
+ 225   3                              return (adcval-temp_map[i].b)/temp_map[i].k;
+ 226   3                      }
+ 227   2              }
+ 228   1      }
+ 229          
+ 230          
+ 231          #define PVAL  20.0F
+ 232          #define IVAL  0.0F
+ 233          #define DVAL  0.0F
+ 234          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
+ 235          {
+ 236   1              static s16  lastadcval=0, addval=0;
+ 237   1              
+ 238   1              float pwm_val = 0;
+ 239   1              int diff = adcvalwant - adcvalt12;
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 5   
 
- 240   1              static s16  lastadcval=0, addval=0;
- 241   1              
- 242   1              float pwm_val = 0;
- 243   1              int diff = adcvalwant - adcvalt12;
- 244   1              pwm_val = PVAL*diff;
- 245   1              if(pwm_val<0)
- 246   1                      pwm_val = -pwm_val;
- 247   1              if(pwm_val > pwmmax)
- 248   1                      pwm_val = pwmmax;
- 249   1              if(adcvalt12>adcvalwant)
- 250   1                      return 100;
- 251   1              return pwm_val;
- 252   1      }
-*** WARNING C280 IN LINE 240 OF main.c: 'lastadcval': unreferenced local variable
-*** WARNING C280 IN LINE 240 OF main.c: 'addval': unreferenced local variable
- 253          
- 254          void Timer0_Isr(void) interrupt 1
- 255          {
- 256   1              if(KEY1==0){
- 257   2                      _K1+=1;
- 258   2              }else{
- 259   2                      _K1=0;
- 260   2              }
- 261   1              if(KEY2==0){
- 262   2                      _K2+=1;
- 263   2              }else{
- 264   2                      _K2=0;
- 265   2              }
- 266   1              if(_K1>80)
- 267   1              {
- 268   2                      _K1=0;
- 269   2                      KEY1_DOWN+=1;
- 270   2              }
- 271   1              if(_K2>80)
- 272   1              {
- 273   2                      _K2=0;
- 274   2                      KEY2_DOWN+=1;
- 275   2              }
- 276   1      }
- 277          
- 278          void Timer0_Init(void)          //1000微秒@40.000MHz
- 279          {
- 280   1              AUXR |= 0x80;                   //定时器时钟1T模式
- 281   1              TMOD &= 0xF0;                   //设置定时器模式
- 282   1              TL0 = 0xC0;                             //设置定时初始值
- 283   1              TH0 = 0x63;                             //设置定时初始值
- 284   1              TF0 = 0;                                //清除TF0标志
- 285   1              TR0 = 1;                                //定时器0开始计时
- 286   1              ET0 = 1;                                //使能定时器0中断
- 287   1      }
- 288          
- 289          
-*** WARNING C291 IN LINE 219 OF main.c: not every exit path returns a value
-*** WARNING C291 IN LINE 232 OF main.c: not every exit path returns a value
+ 240   1              pwm_val = PVAL*diff;
+ 241   1              if(pwm_val<0)
+ 242   1                      pwm_val = -pwm_val;
+ 243   1              if(pwm_val > pwmmax)
+ 244   1                      pwm_val = pwmmax;
+ 245   1              if(adcvalt12>adcvalwant)
+ 246   1                      return 100;
+ 247   1              return pwm_val;
+ 248   1      }
+*** WARNING C280 IN LINE 236 OF main.c: 'lastadcval': unreferenced local variable
+*** WARNING C280 IN LINE 236 OF main.c: 'addval': unreferenced local variable
+ 249          
+ 250          void Timer0_Isr(void) interrupt 1
+ 251          {
+ 252   1              if(KEY1==0){
+ 253   2                      _K1+=1;
+ 254   2              }else{
+ 255   2                      _K1=0;
+ 256   2              }
+ 257   1              if(KEY2==0){
+ 258   2                      _K2+=1;
+ 259   2              }else{
+ 260   2                      _K2=0;
+ 261   2              }
+ 262   1              if(_K1>80)
+ 263   1              {
+ 264   2                      _K1=0;
+ 265   2                      KEY1_DOWN+=1;
+ 266   2              }
+ 267   1              if(_K2>80)
+ 268   1              {
+ 269   2                      _K2=0;
+ 270   2                      KEY2_DOWN+=1;
+ 271   2              }
+ 272   1      }
+ 273          
+ 274          void Timer0_Init(void)          //1000微秒@40.000MHz
+ 275          {
+ 276   1              AUXR |= 0x80;                   //定时器时钟1T模式
+ 277   1              TMOD &= 0xF0;                   //设置定时器模式
+ 278   1              TL0 = 0xC0;                             //设置定时初始值
+ 279   1              TH0 = 0x63;                             //设置定时初始值
+ 280   1              TF0 = 0;                                //清除TF0标志
+ 281   1              TR0 = 1;                                //定时器0开始计时
+ 282   1              ET0 = 1;                                //使能定时器0中断
+ 283   1      }
+ 284          
+ 285          
+*** WARNING C291 IN LINE 215 OF main.c: not every exit path returns a value
+*** WARNING C291 IN LINE 228 OF main.c: not every exit path returns a value
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
@@ -318,8 +314,6 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    XDATA SIZE       =    128      77
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
-C51 COMPILER V9.60.7.0   MAIN                                                              01/31/2024 15:03:03 PAGE 6   
-
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

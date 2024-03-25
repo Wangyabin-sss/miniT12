@@ -47,7 +47,7 @@ int main()
 	u16 PWMVAL = 0;
 	float powerval=0;
 	u16 pwmtime = 0;
-	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波
+	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
 	u16 temp_want = 350,adc_want;
 	s16 mpu_data=0,mpu_diff=0,mpu_time=0,mpu_temp;
 	u8 i;
@@ -73,11 +73,6 @@ INITRESET:
 	OLED_ShowString(72,2,"Tmp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
 	
-	for(i=0;i<5;i++)
-	{
-		mpu_temp = MPU_Get_Temperature();
-		delay_ms(1);
-	}
 	
 	OLED_ShowNum(102,2,mpu_temp,3,8);
 	
@@ -98,20 +93,21 @@ INITRESET:
 		if(pwmtime==2501)  //50*2500=125000us = 125ms周期
 		{
 			pwmtime = 0;
-			//计算当前电源电压并显示
-			powerval = ADC_get_val(1);
-			powerval = (powerval*3300)/4096;
-			powerval = powerval/10000*100;
-			OLED_ShowNum(102,1,powerval*10,3,8);
+			mpu_data = GetData(MPU_GYRO_XOUTH_REG);
 			
-			//根据空闲加热时间获取mpu6050数据
-			if((2500-PWMVAL)>600)
+			//非全速加热时获取当前电压与mpu6050温度数据
+			if((2500-PWMVAL)>800)
 			{
-				mpu_data = GetData(MPU_GYRO_XOUTH_REG);
+				//计算当前电源电压并显示
+				powerval = ADC_get_val(1);
+				powerval = (powerval*3300)/4096;
+				powerval = powerval/10000*100;
+				OLED_ShowNum(102,1,powerval*10,3,8);
 				mpu_temp = MPU_Get_Temperature();
+				OLED_ShowNum(102,2,mpu_temp,3,8);
 			}
 
-			//根据设定的温度转adc值
+			//根据设定的温度获取T12热电偶电压值（adc值）
 			adc_want = temp2adcval(temp_want);
 
 			//adc滤波数组去掉最大最小值，求均值

@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MPU6050                                                           09/18/2023 18:43:43 PAGE 1   
+C51 COMPILER V9.60.7.0   MPU6050                                                           03/25/2024 13:49:33 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MPU6050
@@ -62,7 +62,7 @@ line level    source
   52   1              return MPU_Write_Byte(MPU_ACCEL_CFG_REG,fsr<<3);//设置加速度传感器满量程范围  
   53   1      }
   54          //设置MPU6050的数字低通滤波器
-C51 COMPILER V9.60.7.0   MPU6050                                                           09/18/2023 18:43:43 PAGE 2   
+C51 COMPILER V9.60.7.0   MPU6050                                                           03/25/2024 13:49:33 PAGE 2   
 
   55          //lpf:数字低通滤波频率(Hz)
   56          //返回值:0,设置成功
@@ -126,14 +126,14 @@ line level    source
  114   1              u8 H,L;
  115   1              H=MPU_Read_Byte(REG_Address);
  116   1              L=MPU_Read_Byte(REG_Address+1);
-C51 COMPILER V9.60.7.0   MPU6050                                                           09/18/2023 18:43:43 PAGE 3   
+C51 COMPILER V9.60.7.0   MPU6050                                                           03/25/2024 13:49:33 PAGE 3   
 
  117   1              return ((H<<8)+L);   //合成数据
  118   1      }
  119          
  120          
- 121          //返回值:温度值(扩大了10倍)
- 122          s16 MPU_Get_Temperature(void)
+ 121          //返回值:温度值整数部分
+ 122          float MPU_Get_Temperature(void)
  123          {
  124   1          s16 raw;
  125   1              float temp;
@@ -141,17 +141,17 @@ line level    source
  127   1              
  128   1              H=MPU_Read_Byte(MPU_TEMP_OUTH_REG);
  129   1              L=MPU_Read_Byte(MPU_TEMP_OUTH_REG+1);
- 130   1          raw=(H<<8)+L;  
- 131   1          temp=36.53+raw/340.0f;  
- 132   1          return temp*10;
+ 130   1          raw=(H<<8)+L;
+ 131   1          temp=36.53+raw/340.0f;
+ 132   1          return temp;
  133   1      }
  134          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    524    ----
+   CODE SIZE        =    491    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =   ----      14
+   XDATA SIZE       =   ----      10
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
