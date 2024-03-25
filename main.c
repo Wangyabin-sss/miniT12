@@ -32,7 +32,7 @@ static struct temperature_map{
 						{400,800},
 						{450,850}};
 	
-#define ADCARRAYNUM 6
+#define ADCARRAYNUM 5
 
 void gpio_init(void);
 void ADC_init(void);
@@ -49,9 +49,10 @@ int main()
 	u16 pwmtime = 0;
 	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波
 	u16 temp_want = 350,adc_want;
-	s16 mpu_data=0,mpu_diff=0,mpu_time=0;
+	s16 mpu_data=0,mpu_diff=0,mpu_time=0,mpu_temp;
 	u8 i;
 	
+INITRESET:
 	for(i=0;i<TEMPMAPNUM-1;i++)
 	{
 		temp_map[i].k = (temp_map[i+1].adc-temp_map[i].adc)/50.0f;
@@ -69,7 +70,16 @@ int main()
 
 	OLED_ShowString(72,0,"Set:",8);
 	OLED_ShowString(72,1,"Pow:",8);
+	OLED_ShowString(72,2,"Tmp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
+	
+	for(i=0;i<5;i++)
+	{
+		mpu_temp = MPU_Get_Temperature();
+		delay_ms(1);
+	}
+	
+	OLED_ShowNum(102,2,mpu_temp,3,8);
 	
 	while(1)
 	{
@@ -85,7 +95,7 @@ int main()
 		}
 		delay_us(50);
 		pwmtime++;
-		if(pwmtime==2001)  //50*2000=100000us = 100ms周期
+		if(pwmtime==2501)  //50*2500=125000us = 125ms周期
 		{
 			pwmtime = 0;
 			//计算当前电源电压并显示
@@ -94,10 +104,11 @@ int main()
 			powerval = powerval/10000*100;
 			OLED_ShowNum(102,1,powerval*10,3,8);
 			
-			//获取mpu6050数据
-			if((2000-PWMVAL)>800)
+			//根据空闲加热时间获取mpu6050数据
+			if((2500-PWMVAL)>600)
 			{
 				mpu_data = GetData(MPU_GYRO_XOUTH_REG);
+				mpu_temp = MPU_Get_Temperature();
 			}
 
 			//根据设定的温度转adc值
@@ -116,7 +127,7 @@ int main()
 				t12adc_all += t12adc_val[i];
 			}
 			t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
-			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2000);
+			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
 			OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
 
 			//计算运算放大器输出电压，填充数组
@@ -127,6 +138,12 @@ int main()
 				t12adc_i = 0;
 			
 			//按键检测
+			if(KEY1_DOWN&&KEY2_DOWN)
+			{
+				KEY1_DOWN = 0;
+				KEY2_DOWN = 0;
+				goto INITRESET;
+			}
 			if(KEY1_DOWN)
 			{
 				OLED_ShowNum(102,0,temp_want+=KEY1_DOWN,3,8);
@@ -220,6 +237,8 @@ u16 adc2tempval(u16 adcval)
 #define DVAL  0.0F
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
 {
+	static s16  lastadcval=0, addval=0;
+	
 	float pwm_val = 0;
 	int diff = adcvalwant - adcvalt12;
 	pwm_val = PVAL*diff;
@@ -244,12 +263,12 @@ void Timer0_Isr(void) interrupt 1
 	}else{
 		_K2=0;
 	}
-	if(_K1>70)
+	if(_K1>80)
 	{
 		_K1=0;
 		KEY1_DOWN+=1;
 	}
-	if(_K2>70)
+	if(_K2>80)
 	{
 		_K2=0;
 		KEY2_DOWN+=1;

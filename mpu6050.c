@@ -118,3 +118,17 @@ s16 GetData(u8 REG_Address)
 }
 
 
+//返回值:温度值(扩大了10倍)
+s16 MPU_Get_Temperature(void)
+{
+    s16 raw;
+	float temp;
+	u8 H,L;
+	
+	H=MPU_Read_Byte(MPU_TEMP_OUTH_REG);
+	L=MPU_Read_Byte(MPU_TEMP_OUTH_REG+1);
+    raw=(H<<8)+L;  
+    temp=36.53+raw/340.0f;  
+    return temp*10;
+}
+

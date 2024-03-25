@@ -383,6 +383,7 @@ void OLED_Init(void)
 
     SSD1306_WRITECOMMAND(0xAF); // Set display on
 	
+	delay_ms(300);
 	OLED_Clear();
 }
 

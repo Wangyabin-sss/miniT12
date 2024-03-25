@@ -84,7 +84,7 @@ u8 MPU_Write_Byte(u8 REG_Address,u8 REG_data);
 u8 MPU_Read_Byte(u8 REG_Address);
 u8 InitMPU6050(void);
 s16 GetData(u8 REG_Address);
-
+s16 MPU_Get_Temperature(void);
 
 
 
