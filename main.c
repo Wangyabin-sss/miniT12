@@ -88,9 +88,9 @@ INITRESET:
 			SWITCH = 0;
 			LED = 1;
 		}
-		delay_us(50);
+		delay_us(40);
 		pwmtime++;
-		if(pwmtime==2501)  //50*2500=125000us = 125ms周期
+		if(pwmtime==2501)  //40*2500=100000us = 100ms周期
 		{
 			pwmtime = 0;
 			mpu_data = GetData(MPU_GYRO_XOUTH_REG);

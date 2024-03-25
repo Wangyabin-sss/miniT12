@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 14:33:11 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   51   1              u16 temp_want = 350,adc_want;
   52   1              s16 mpu_data=0,mpu_diff=0,mpu_time=0,mpu_temp;
   53   1              u8 i;
-C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 14:33:11 PAGE 2   
 
   54   1              
   55   1      INITRESET:
@@ -101,9 +101,9 @@ line level    source
   88   3                              SWITCH = 0;
   89   3                              LED = 1;
   90   3                      }
-  91   2                      delay_us(50);
+  91   2                      delay_us(40);
   92   2                      pwmtime++;
-  93   2                      if(pwmtime==2501)  //50*2500=125000us = 125ms周期
+  93   2                      if(pwmtime==2501)  //40*2500=100000us = 100ms周期
   94   2                      {
   95   3                              pwmtime = 0;
   96   3                              mpu_data = GetData(MPU_GYRO_XOUTH_REG);
@@ -126,7 +126,7 @@ line level    source
  113   3                              //adc滤波数组去掉最大最小值，求均值
  114   3                              t12adc_max=t12adc_val[0];
  115   3                              t12adc_min=t12adc_val[0];
-C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 3   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 14:33:11 PAGE 3   
 
  116   3                              t12adc_all = 0;
  117   3                              for(i=0;i<ADCARRAYNUM;i++)
@@ -190,7 +190,7 @@ line level    source
  175   1              KEY2=1;
  176   1              SCL=1;
  177   1              SDA=1;
-C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 4   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 14:33:11 PAGE 4   
 
  178   1      }
  179          
@@ -254,7 +254,7 @@ line level    source
  237   1              
  238   1              float pwm_val = 0;
  239   1              int diff = adcvalwant - adcvalt12;
-C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 13:49:33 PAGE 5   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/25/2024 14:33:11 PAGE 5   
 
  240   1              pwm_val = PVAL*diff;
  241   1              if(pwm_val<0)
