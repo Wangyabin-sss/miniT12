@@ -98,7 +98,7 @@ int main()
 			mpu_data = GetData(MPU_GYRO_YOUTH_REG);
 			
 			//非全速加热时获取当前电压与mpu6050温度数据
-			if((2500-PWMVAL)>800)
+			if((2500-PWMVAL)>1000)
 			{
 				//计算当前电源电压并显示
 				powerval = ADC_get_val(1);
@@ -230,8 +230,8 @@ u16 adc2tempval(u16 adcval)
 }
 
 
-#define PVAL  12.0F
-#define IVAL  0.92F
+#define PVAL  25.0F
+#define IVAL  0.82F
 #define DVAL  1.20F
 #define INTEGRAL 1500
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)

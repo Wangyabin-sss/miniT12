@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 13:59:50 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 14:28:28 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   51   1              u16 temp_want = 350,adc_want;
   52   1              s16 mpu_data=0,mpu_diff=0,mpu_time=0,mpu_temp;
   53   1              u8 i;
-C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 13:59:50 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 14:28:28 PAGE 2   
 
   54   1              
   55   1      
@@ -111,7 +111,7 @@ line level    source
   98   3                              mpu_data = GetData(MPU_GYRO_YOUTH_REG);
   99   3                              
  100   3                              //非全速加热时获取当前电压与mpu6050温度数据
- 101   3                              if((2500-PWMVAL)>800)
+ 101   3                              if((2500-PWMVAL)>1000)
  102   3                              {
  103   4                                      //计算当前电源电压并显示
  104   4                                      powerval = ADC_get_val(1);
@@ -126,7 +126,7 @@ line level    source
  113   3                              adc_want = temp2adcval(temp_want);
  114   3      
  115   3                              //adc滤波数组去掉最大最小值，求均值
-C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 13:59:50 PAGE 3   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 14:28:28 PAGE 3   
 
  116   3                              t12adc_max=t12adc_val[0];
  117   3                              t12adc_min=t12adc_val[0];
@@ -190,7 +190,7 @@ line level    source
  175   1              
  176   1              KEY1=1;
  177   1              KEY2=1;
-C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 13:59:50 PAGE 4   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 14:28:28 PAGE 4   
 
  178   1              SCL=1;
  179   1              SDA=1;
@@ -247,14 +247,14 @@ line level    source
  230   1      }
  231          
  232          
- 233          #define PVAL  12.0F
- 234          #define IVAL  0.92F
+ 233          #define PVAL  25.0F
+ 234          #define IVAL  0.82F
  235          #define DVAL  1.20F
  236          #define INTEGRAL 1500
  237          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
  238          {
  239   1              static s16  lasterror=0, integralval=0;
-C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 13:59:50 PAGE 5   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 14:28:28 PAGE 5   
 
  240   1              s16 error,derror, pwmval=0;
  241   1              error = adcvalwant - adcvalt12;
@@ -318,7 +318,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    CONSTANT SIZE    =     35    ----
    XDATA SIZE       =    128      73
    PDATA SIZE       =   ----    ----
-C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 13:59:50 PAGE 6   
+C51 COMPILER V9.60.7.0   MAIN                                                              03/27/2024 14:28:28 PAGE 6   
 
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
