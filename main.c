@@ -52,7 +52,7 @@ int main()
 	s16 mpu_data=0,mpu_diff=0,mpu_time=0,mpu_temp;
 	u8 i;
 	
-INITRESET:
+
 	for(i=0;i<TEMPMAPNUM-1;i++)
 	{
 		temp_map[i].k = (temp_map[i+1].adc-temp_map[i].adc)/50.0f;
@@ -78,22 +78,24 @@ INITRESET:
 	
 	while(1)
 	{
+		//加热
 		if(pwmtime<PWMVAL)
 		{
 			SWITCH = 1;
 			LED = 0;
 		}
+		//断开
 		else
 		{
 			SWITCH = 0;
 			LED = 1;
 		}
-		delay_us(40);
+		delay_us(25);
 		pwmtime++;
-		if(pwmtime==2501)  //40*2500=100000us = 100ms周期
+		if(pwmtime==2501)  //25*2500=62500us = 62.5ms = 16Hz
 		{
 			pwmtime = 0;
-			mpu_data = GetData(MPU_GYRO_XOUTH_REG);
+			mpu_data = GetData(MPU_GYRO_YOUTH_REG);
 			
 			//非全速加热时获取当前电压与mpu6050温度数据
 			if((2500-PWMVAL)>800)
@@ -134,18 +136,18 @@ INITRESET:
 				t12adc_i = 0;
 			
 			//按键检测
-			if(KEY1_DOWN&&KEY2_DOWN)
+			if(KEY1_DOWN&&KEY2_DOWN)  //同时按下
 			{
 				KEY1_DOWN = 0;
 				KEY2_DOWN = 0;
-				goto INITRESET;
+				
 			}
-			if(KEY1_DOWN)
+			if(KEY1_DOWN)   //KEY1按下
 			{
 				OLED_ShowNum(102,0,temp_want+=KEY1_DOWN,3,8);
 				KEY1_DOWN = 0;
 			}
-			if(KEY2_DOWN)
+			if(KEY2_DOWN)  //KEY2按下
 			{
 				OLED_ShowNum(102,0,temp_want-=KEY2_DOWN,3,8);
 				KEY2_DOWN = 0;
@@ -159,7 +161,7 @@ void gpio_init(void)
 {
 	P_SW2 |= 0x80;     //使能访问 XFR
 	
-	P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED  SWITCH
+	P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED & SWITCH
 	P3M1 &= ~(3<<5);
 	
 	P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
@@ -228,23 +230,28 @@ u16 adc2tempval(u16 adcval)
 }
 
 
-#define PVAL  20.0F
-#define IVAL  0.0F
-#define DVAL  0.0F
+#define PVAL  12.0F
+#define IVAL  0.92F
+#define DVAL  1.20F
+#define INTEGRAL 1500
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
 {
-	static s16  lastadcval=0, addval=0;
+	static s16  lasterror=0, integralval=0;
+	s16 error,derror, pwmval=0;
+	error = adcvalwant - adcvalt12;
+	integralval += error;
+	if(integralval>INTEGRAL)
+		integralval = INTEGRAL;
+	if(integralval<-INTEGRAL)
+		integralval = -INTEGRAL;
 	
-	float pwm_val = 0;
-	int diff = adcvalwant - adcvalt12;
-	pwm_val = PVAL*diff;
-	if(pwm_val<0)
-		pwm_val = -pwm_val;
-	if(pwm_val > pwmmax)
-		pwm_val = pwmmax;
-	if(adcvalt12>adcvalwant)
-		return 100;
-	return pwm_val;
+	derror = error - lasterror;
+	pwmval = PVAL*error + IVAL*integralval + DVAL*derror;
+	lasterror = error;
+	
+	if(pwmval > pwmmax)
+		pwmval = pwmmax;
+	return pwmval;
 }
 
 void Timer0_Isr(void) interrupt 1
