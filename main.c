@@ -33,6 +33,9 @@ static struct temperature_map{
 						{450,850}};
 	
 #define ADCARRAYNUM 5
+#define SLEEPTIME   300
+#define MPUGRYLIEMT 10
+
 
 void gpio_init(void);
 void ADC_init(void);
@@ -42,6 +45,9 @@ u16 adc2tempval(u16 adcval);
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax);
 void Timer0_Init(void);
 
+						
+						
+#if 1
 int main()
 {
 	u16 PWMVAL = 0;
@@ -100,13 +106,14 @@ int main()
 			//非全速加热时获取当前电压与mpu6050温度数据
 			if((2500-PWMVAL)>1000)
 			{
-				//计算当前电源电压并显示
-				powerval = ADC_get_val(1);
-				powerval = (powerval*3300)/4096;
-				powerval = powerval/10000*100;
-				OLED_ShowNum(102,1,powerval*10,3,8);
-				mpu_temp = MPU_Get_Temperature();
-				OLED_ShowNum(102,2,mpu_temp,3,8);
+//				//计算当前电源电压并显示
+//				powerval = ADC_get_val(1);
+//				powerval = (powerval*3300)/4096;
+//				powerval = powerval/10000*100;
+//				OLED_ShowNum(102,1,powerval*10,3,8);
+//				mpu_temp = MPU_Get_Temperature();
+//				OLED_ShowNum(102,2,mpu_temp,3,8);
+				OLED_ShowNum(10,2,mpu_data,5,8);
 			}
 
 			//根据设定的温度获取T12热电偶电压值（adc值）
@@ -144,17 +151,82 @@ int main()
 			}
 			if(KEY1_DOWN)   //KEY1按下
 			{
-				OLED_ShowNum(102,0,temp_want+=KEY1_DOWN,3,8);
+				temp_want+=KEY1_DOWN;
+				if(temp_want>450)
+					temp_want = 450;
+				OLED_ShowNum(102,0,temp_want,3,8);
 				KEY1_DOWN = 0;
 			}
 			if(KEY2_DOWN)  //KEY2按下
 			{
-				OLED_ShowNum(102,0,temp_want-=KEY2_DOWN,3,8);
+				temp_want-=KEY2_DOWN;
+				if(temp_want<0)
+					temp_want = 0;
+				OLED_ShowNum(102,0,temp_want,3,8);
 				KEY2_DOWN = 0;
 			}
 		}
 	}
 }
+#else
+//硬件测试
+int main()
+{
+	u8 flag=0;
+	s16 mpu_data,mpu_temp;
+	float powerval;
+	
+	gpio_init();
+	OLED_Init();
+	ADC_init();
+	Timer0_Init();
+	InitMPU6050();
+	
+	EA = 1;
+	SWITCH = 0;
+	
+	while(1)
+	{
+		mpu_data = GetData(MPU_GYRO_YOUTH_REG);
+		mpu_temp = MPU_Get_Temperature();
+
+		if(mpu_data<0)
+		{
+			mpu_data = -mpu_data;
+			OLED_ShowString(0,0,"-",8);
+		}
+		else
+		{
+			OLED_ShowString(0,0,"+",8);
+		}
+			
+		OLED_ShowNum(10,0,mpu_data,5,8);
+		OLED_ShowNum(72,0,mpu_temp,4,8);
+		
+		
+		//计算当前电源电压并显示
+		powerval = ADC_get_val(1);
+		powerval = (powerval*3300)/4096;
+		powerval = powerval/10000*100;
+		OLED_ShowNum(10,1,powerval*10,3,8);
+		
+		if(flag==1)
+		{
+			SWITCH = 1;
+			LED = 0;
+			flag = 0;
+		}
+		else
+		{
+			SWITCH = 0;
+			LED = 1;
+			flag = 1;
+		}
+		
+		delay_ms(60);
+	}
+}
+#endif
 
 
 void gpio_init(void)
@@ -214,6 +286,7 @@ u16 temp2adcval(u16 temperature)
 			return temp_map[i].k*temperature+temp_map[i].b;
 		}
 	}
+	return temp_map[i].k*temperature+temp_map[i].b;
 }
 
 u16 adc2tempval(u16 adcval)
@@ -227,6 +300,7 @@ u16 adc2tempval(u16 adcval)
 			return (adcval-temp_map[i].b)/temp_map[i].k;
 		}
 	}
+	return (adcval-temp_map[i].b)/temp_map[i].k;
 }
 
 
