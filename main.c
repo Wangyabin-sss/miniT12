@@ -33,8 +33,8 @@ static struct temperature_map{
 						{450,850}};
 	
 #define ADCARRAYNUM 5       //t12 adc数组
-#define SLEEPTIME   180     //休眠时间（秒）
-#define CLOSETIME   300     //关闭时间（秒）
+#define SLEEPTIME   300     //休眠时间（秒）
+#define CLOSETIME   600     //关闭时间（秒）
 #define MPUGRYLIEMT 20      //mpu6050震动范围（判断静置状态）
 #define PWMHZ       10      //当前加热频率
 
