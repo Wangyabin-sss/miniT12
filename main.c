@@ -32,9 +32,11 @@ static struct temperature_map{
 						{400,800},
 						{450,850}};
 	
-#define ADCARRAYNUM 5
-#define SLEEPTIME   300
-#define MPUGRYLIEMT 10
+#define ADCARRAYNUM 5       //t12 adc数组
+#define SLEEPTIME   180     //休眠时间（秒）
+#define CLOSETIME   300     //关闭时间（秒）
+#define MPUGRYLIEMT 20      //mpu6050震动范围（判断静置状态）
+#define PWMHZ       16      //当前加热频率
 
 
 void gpio_init(void);
@@ -42,20 +44,19 @@ void ADC_init(void);
 u16 ADC_get_val(u8 channel);
 u16 temp2adcval(u16 temperature);
 u16 adc2tempval(u16 adcval);
-int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax);
+int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax);
 void Timer0_Init(void);
-
+s16 abs(s16 num);
 						
 						
 #if 1
 int main()
 {
-	u16 PWMVAL = 0;
+	s16 PWMVAL = 0, pwmtime = 0;
 	float powerval=0;
-	u16 pwmtime = 0;
 	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
-	u16 temp_want = 350,adc_want;
-	s16 mpu_data=0,mpu_diff=0,mpu_time=0,mpu_temp;
+	u16 temp_want = 350,temp_set=350,adc_want;
+	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time,mpu_temp;
 	u8 i;
 	
 
@@ -76,11 +77,9 @@ int main()
 
 	OLED_ShowString(72,0,"Set:",8);
 	OLED_ShowString(72,1,"Pow:",8);
-	OLED_ShowString(72,2,"Tmp:",8);
+	OLED_ShowString(72,2,"Slp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
 	
-	
-	OLED_ShowNum(102,2,mpu_temp,3,8);
 	
 	while(1)
 	{
@@ -101,9 +100,27 @@ int main()
 		if(pwmtime==2501)  //25*2500=62500us = 62.5ms = 16Hz
 		{
 			pwmtime = 0;
+			//静止时间检测
 			mpu_data = GetData(MPU_GYRO_YOUTH_REG);
+			mpu_data_diff = mpu_data - mpu_data_last;
+			mpu_data_last = mpu_data;
+			if(abs(mpu_data_diff)<MPUGRYLIEMT)
+			{
+				mpu_time++;
+			}
+			else
+				mpu_time=0;
 			
-			//非全速加热时获取当前电压与mpu6050温度数据
+			//休眠、关闭、加热状态切换
+			if(mpu_time/PWMHZ>SLEEPTIME)
+				temp_want = 200;
+			else if(mpu_time/PWMHZ>CLOSETIME)
+				temp_want = 0;
+			else
+				temp_want = temp_set;
+				
+			
+			//非全速加热时显示一些非必要数据
 			if((2500-PWMVAL)>1000)
 			{
 //				//计算当前电源电压并显示
@@ -111,9 +128,11 @@ int main()
 //				powerval = (powerval*3300)/4096;
 //				powerval = powerval/10000*100;
 //				OLED_ShowNum(102,1,powerval*10,3,8);
+//				//mpu6050温度传感器温度
 //				mpu_temp = MPU_Get_Temperature();
 //				OLED_ShowNum(102,2,mpu_temp,3,8);
-				OLED_ShowNum(10,2,mpu_data,5,8);
+				//显示静置时长
+				OLED_ShowNum(102,2,mpu_time/PWMHZ,3,8);
 			}
 
 			//根据设定的温度获取T12热电偶电压值（adc值）
@@ -132,10 +151,12 @@ int main()
 				t12adc_all += t12adc_val[i];
 			}
 			t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
+			//PID控制PWM加热占空比
 			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
+			//显示当前温度
 			OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
 
-			//计算运算放大器输出电压，填充数组
+			//计算运算放大器输出电压 && 填充数组
 			t12adc_val[t12adc_i] = ADC_get_val(0);
 			t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
 			t12adc_i++;
@@ -154,6 +175,7 @@ int main()
 				temp_want+=KEY1_DOWN;
 				if(temp_want>450)
 					temp_want = 450;
+				temp_set = temp_want;
 				OLED_ShowNum(102,0,temp_want,3,8);
 				KEY1_DOWN = 0;
 			}
@@ -162,6 +184,7 @@ int main()
 				temp_want-=KEY2_DOWN;
 				if(temp_want<0)
 					temp_want = 0;
+				temp_set = temp_want;
 				OLED_ShowNum(102,0,temp_want,3,8);
 				KEY2_DOWN = 0;
 			}
@@ -172,7 +195,7 @@ int main()
 //硬件测试
 int main()
 {
-	u8 flag=0;
+	u8 flag=0,ret;
 	s16 mpu_data,mpu_temp;
 	float powerval;
 	
@@ -180,7 +203,8 @@ int main()
 	OLED_Init();
 	ADC_init();
 	Timer0_Init();
-	InitMPU6050();
+	ret = InitMPU6050();
+	OLED_ShowNum(10,2,ret,3,8);
 	
 	EA = 1;
 	SWITCH = 0;
@@ -308,7 +332,7 @@ u16 adc2tempval(u16 adcval)
 #define IVAL  0.82F
 #define DVAL  1.20F
 #define INTEGRAL 1500
-int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, u16 pwmmax)
+int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax)
 {
 	static s16  lasterror=0, integralval=0;
 	s16 error,derror, pwmval=0;
@@ -362,5 +386,15 @@ void Timer0_Init(void)		//1000微秒@40.000MHz
 	TR0 = 1;				//定时器0开始计时
 	ET0 = 1;				//使能定时器0中断
 }
+
+
+s16 abs(s16 num)
+{
+	if(num<0)
+		return -num;
+	else
+		return num;
+}
+
 
 

@@ -13,7 +13,7 @@ void delay_ms(u16 ms)
 
 void delay_us(u16 us)
 {
-	u16 i = us*11;
+	u16 i = us*8;
 	while (--i);
 }
 

@@ -12,8 +12,7 @@ sbit SCL=P1^5;//SCL
 sbit SDA=P1^4;//SDA
 
 
-#define IIC_delay()   delay_us(1)
-
+void IIC_delay(void);
 
 void I2C_Start(void);
 void I2C_Stop(void);
