@@ -36,7 +36,7 @@ static struct temperature_map{
 #define SLEEPTIME   180     //休眠时间（秒）
 #define CLOSETIME   300     //关闭时间（秒）
 #define MPUGRYLIEMT 20      //mpu6050震动范围（判断静置状态）
-#define PWMHZ       16      //当前加热频率
+#define PWMHZ       10      //当前加热频率
 
 
 void gpio_init(void);
@@ -95,9 +95,9 @@ int main()
 			SWITCH = 0;
 			LED = 1;
 		}
-		delay_us(25);
+		delay_us(40);
 		pwmtime++;
-		if(pwmtime==2501)  //25*2500=62500us = 62.5ms = 16Hz
+		if(pwmtime==2501)  //40*2500=100000us = 100ms = 10Hz
 		{
 			pwmtime = 0;
 			//静止时间检测
@@ -112,10 +112,10 @@ int main()
 				mpu_time=0;
 			
 			//休眠、关闭、加热状态切换
-			if(mpu_time/PWMHZ>SLEEPTIME)
-				temp_want = 200;
-			else if(mpu_time/PWMHZ>CLOSETIME)
+			if(mpu_time/PWMHZ>CLOSETIME)
 				temp_want = 0;
+			else if(mpu_time/PWMHZ>SLEEPTIME)
+				temp_want = 200;
 			else
 				temp_want = temp_set;
 				

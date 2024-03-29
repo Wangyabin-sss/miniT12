@@ -4,7 +4,7 @@
 
 void IIC_delay(void)
 {
-	u8 i = 11;
+	u8 i = 6;
 	while (--i);
 }
 
