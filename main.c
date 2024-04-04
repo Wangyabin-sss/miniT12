@@ -10,7 +10,7 @@ sbit KEY2   = P3^2;
 u8 _K1 = 0,_K2 = 0;
 u8 KEY1_DOWN=0,KEY2_DOWN=0;
 
-//ÔË·ÅµçÑ¹ÓëÎÂ¶È¶ÔÓ¦±í  0  50  100  150  200  250  300  350  400  450
+//è¿æ”¾ç”µå‹ä¸æ¸©åº¦å¯¹åº”è¡¨  0  50  100  150  200  250  300  350  400  450
 //  adc
 //  |
 //	|____temp
@@ -22,21 +22,21 @@ static struct temperature_map{
 	float k;
 	float b;
 }temp_map[TEMPMAPNUM] = {{0,0},
-						{50,100},
-						{100,200},
-						{150,300},
-						{200,400},
-						{250,500},
-						{300,600},
-						{350,750},
-						{400,800},
-						{450,850}};
+						{50,90},
+						{100,254},
+						{150,350},
+						{200,488},
+						{250,620},
+						{300,786},
+						{350,922},
+						{400,1060},
+						{450,1250}};
 	
-#define ADCARRAYNUM 5       //t12 adcÊı×é
-#define SLEEPTIME   300     //ĞİÃßÊ±¼ä£¨Ãë£©
-#define CLOSETIME   600     //¹Ø±ÕÊ±¼ä£¨Ãë£©
-#define MPUGRYLIEMT 20      //mpu6050Õğ¶¯·¶Î§£¨ÅĞ¶Ï¾²ÖÃ×´Ì¬£©
-#define PWMHZ       10      //µ±Ç°¼ÓÈÈÆµÂÊ
+#define ADCARRAYNUM 5       //t12 adcæ•°ç»„
+#define SLEEPTIME   300     //ä¼‘çœ æ—¶é—´ï¼ˆç§’ï¼‰
+#define CLOSETIME   600     //å…³é—­æ—¶é—´ï¼ˆç§’ï¼‰
+#define MPUGRYLIEMT 20      //mpu6050éœ‡åŠ¨èŒƒå›´ï¼ˆåˆ¤æ–­é™ç½®çŠ¶æ€ï¼‰
+#define PWMHZ       10      //å½“å‰åŠ çƒ­é¢‘ç‡
 
 
 void gpio_init(void);
@@ -54,7 +54,7 @@ int main()
 {
 	s16 PWMVAL = 0, pwmtime = 0;
 	float powerval=0;
-	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc¾ùÖµÂË²¨  adcµçÑ¹µ¥Î»mV
+	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adcå‡å€¼æ»¤æ³¢  adcç”µå‹å•ä½mV
 	u16 temp_want = 350,temp_set=350,adc_want;
 	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time,mpu_temp;
 	u8 i;
@@ -79,17 +79,23 @@ int main()
 	OLED_ShowString(72,1,"Pow:",8);
 	OLED_ShowString(72,2,"Slp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
-	
+
+
+	//è®¡ç®—å½“å‰ç”µæºç”µå‹å¹¶æ˜¾ç¤º
+	powerval = ADC_get_val(1);
+	powerval = (powerval*3300)/4096;
+	powerval = powerval/1000*11.2;
+	OLED_ShowNum(102,1,powerval*10,3,8);
 	
 	while(1)
 	{
-		//¼ÓÈÈ
+		//åŠ çƒ­
 		if(pwmtime<PWMVAL)
 		{
 			SWITCH = 1;
 			LED = 0;
 		}
-		//¶Ï¿ª
+		//æ–­å¼€
 		else
 		{
 			SWITCH = 0;
@@ -100,7 +106,7 @@ int main()
 		if(pwmtime==2501)  //40*2500=100000us = 100ms = 10Hz
 		{
 			pwmtime = 0;
-			//¾²Ö¹Ê±¼ä¼ì²â
+			//é™æ­¢æ—¶é—´æ£€æµ‹
 			mpu_data = GetData(MPU_GYRO_YOUTH_REG);
 			mpu_data_diff = mpu_data - mpu_data_last;
 			mpu_data_last = mpu_data;
@@ -111,7 +117,7 @@ int main()
 			else
 				mpu_time=0;
 			
-			//ĞİÃß¡¢¹Ø±Õ¡¢¼ÓÈÈ×´Ì¬ÇĞ»»
+			//ä¼‘çœ ã€å…³é—­ã€åŠ çƒ­çŠ¶æ€åˆ‡æ¢
 			if(mpu_time/PWMHZ>CLOSETIME)
 				temp_want = 0;
 			else if(mpu_time/PWMHZ>SLEEPTIME)
@@ -120,25 +126,25 @@ int main()
 				temp_want = temp_set;
 				
 			
-			//·ÇÈ«ËÙ¼ÓÈÈÊ±ÏÔÊ¾Ò»Ğ©·Ç±ØÒªÊı¾İ
+			//éå…¨é€ŸåŠ çƒ­æ—¶æ˜¾ç¤ºä¸€äº›éå¿…è¦æ•°æ®
 			if((2500-PWMVAL)>1000)
 			{
-//				//¼ÆËãµ±Ç°µçÔ´µçÑ¹²¢ÏÔÊ¾
+//				//è®¡ç®—å½“å‰ç”µæºç”µå‹å¹¶æ˜¾ç¤º
 //				powerval = ADC_get_val(1);
 //				powerval = (powerval*3300)/4096;
 //				powerval = powerval/10000*100;
 //				OLED_ShowNum(102,1,powerval*10,3,8);
-//				//mpu6050ÎÂ¶È´«¸ĞÆ÷ÎÂ¶È
+//				//mpu6050æ¸©åº¦ä¼ æ„Ÿå™¨æ¸©åº¦
 //				mpu_temp = MPU_Get_Temperature();
 //				OLED_ShowNum(102,2,mpu_temp,3,8);
-				//ÏÔÊ¾¾²ÖÃÊ±³¤
+				//æ˜¾ç¤ºé™ç½®æ—¶é•¿
 				OLED_ShowNum(102,2,mpu_time/PWMHZ,3,8);
 			}
 
-			//¸ù¾İÉè¶¨µÄÎÂ¶È»ñÈ¡T12ÈÈµçÅ¼µçÑ¹Öµ£¨adcÖµ£©
+			//æ ¹æ®è®¾å®šçš„æ¸©åº¦è·å–T12çƒ­ç”µå¶ç”µå‹å€¼ï¼ˆadcå€¼ï¼‰
 			adc_want = temp2adcval(temp_want);
 
-			//adcÂË²¨Êı×éÈ¥µô×î´ó×îĞ¡Öµ£¬Çó¾ùÖµ
+			//adcæ»¤æ³¢æ•°ç»„å»æ‰æœ€å¤§æœ€å°å€¼ï¼Œæ±‚å‡å€¼
 			t12adc_max=t12adc_val[0];
 			t12adc_min=t12adc_val[0];
 			t12adc_all = 0;
@@ -151,26 +157,26 @@ int main()
 				t12adc_all += t12adc_val[i];
 			}
 			t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
-			//PID¿ØÖÆPWM¼ÓÈÈÕ¼¿Õ±È
+			//PIDæ§åˆ¶PWMåŠ çƒ­å ç©ºæ¯”
 			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
-			//ÏÔÊ¾µ±Ç°ÎÂ¶È
+			//æ˜¾ç¤ºå½“å‰æ¸©åº¦
 			OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
 
-			//¼ÆËãÔËËã·Å´óÆ÷Êä³öµçÑ¹ && Ìî³äÊı×é
+			//è®¡ç®—è¿ç®—æ”¾å¤§å™¨è¾“å‡ºç”µå‹ && å¡«å……æ•°ç»„
 			t12adc_val[t12adc_i] = ADC_get_val(0);
 			t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
 			t12adc_i++;
 			if(t12adc_i==ADCARRAYNUM)
 				t12adc_i = 0;
 			
-			//°´¼ü¼ì²â
-			if(KEY1_DOWN&&KEY2_DOWN)  //Í¬Ê±°´ÏÂ
+			//æŒ‰é”®æ£€æµ‹
+			if(KEY1_DOWN&&KEY2_DOWN)  //åŒæ—¶æŒ‰ä¸‹
 			{
 				KEY1_DOWN = 0;
 				KEY2_DOWN = 0;
 				
 			}
-			if(KEY1_DOWN)   //KEY1°´ÏÂ
+			if(KEY1_DOWN)   //KEY1æŒ‰ä¸‹
 			{
 				temp_want+=KEY1_DOWN;
 				if(temp_want>450)
@@ -179,7 +185,7 @@ int main()
 				OLED_ShowNum(102,0,temp_want,3,8);
 				KEY1_DOWN = 0;
 			}
-			if(KEY2_DOWN)  //KEY2°´ÏÂ
+			if(KEY2_DOWN)  //KEY2æŒ‰ä¸‹
 			{
 				temp_want-=KEY2_DOWN;
 				if(temp_want<0)
@@ -192,7 +198,7 @@ int main()
 	}
 }
 #else
-//Ó²¼ş²âÊÔ
+//ç¡¬ä»¶æµ‹è¯•
 int main()
 {
 	u8 flag=0,ret;
@@ -228,7 +234,7 @@ int main()
 		OLED_ShowNum(72,0,mpu_temp,4,8);
 		
 		
-		//¼ÆËãµ±Ç°µçÔ´µçÑ¹²¢ÏÔÊ¾
+		//è®¡ç®—å½“å‰ç”µæºç”µå‹å¹¶æ˜¾ç¤º
 		powerval = ADC_get_val(1);
 		powerval = (powerval*3300)/4096;
 		powerval = powerval/10000*100;
@@ -255,18 +261,18 @@ int main()
 
 void gpio_init(void)
 {
-	P_SW2 |= 0x80;     //Ê¹ÄÜ·ÃÎÊ XFR
+	P_SW2 |= 0x80;     //ä½¿èƒ½è®¿é—® XFR
 	
-	P3M0 |= (3<<5);    //ÉèÖÃ P3.5  P3.6ÎªÍÆÍìÄ£Ê½   LED & SWITCH
+	P3M0 |= (3<<5);    //è®¾ç½® P3.5  P3.6ä¸ºæ¨æŒ½æ¨¡å¼   LED & SWITCH
 	P3M1 &= ~(3<<5);
 	
-	P1M0 |= (3<<4);    //ÉèÖÃ P1.4  P1.5Îª¿ªÂ©Ä£Ê½   IIC ´øÉÏÀ­µç×è
+	P1M0 |= (3<<4);    //è®¾ç½® P1.4  P1.5ä¸ºå¼€æ¼æ¨¡å¼   IIC å¸¦ä¸Šæ‹‰ç”µé˜»
 	P1M1 |= (3<<4);
 	
-	P1M0 &= ~(3<<0);   //ÉèÖÃ P1.0  P1.1Îª¸ß×èÊäÈë   ADC
+	P1M0 &= ~(3<<0);   //è®¾ç½® P1.0  P1.1ä¸ºé«˜é˜»è¾“å…¥   ADC
 	P1M1 |= (3<<0);
 	
-	P3M0 &= ~(3<<2);    //ÉèÖÃ P3.2  P3.3Îª×¼Ë«ÏòÄ£Ê½   KEY
+	P3M0 &= ~(3<<2);    //è®¾ç½® P3.2  P3.3ä¸ºå‡†åŒå‘æ¨¡å¼   KEY
 	P3M1 &= ~(3<<2);
 	
 	KEY1=1;
@@ -277,24 +283,24 @@ void gpio_init(void)
 
 void ADC_init(void)
 {
-	ADCTIM = 0x3f;//ÉèÖÃ ADC ÄÚ²¿Ê±Ğò
-	ADCCFG = 0x0f;//ÉèÖÃ ADC Ê±ÖÓÎªÏµÍ³Ê±ÖÓ/2/16
-	ADC_CONTR = 0x80;//Ê¹ÄÜ ADC Ä£¿é
+	ADCTIM = 0x3f;//è®¾ç½® ADC å†…éƒ¨æ—¶åº
+	ADCCFG = 0x0f;//è®¾ç½® ADC æ—¶é’Ÿä¸ºç³»ç»Ÿæ—¶é’Ÿ/2/16
+	ADC_CONTR = 0x80;//ä½¿èƒ½ ADC æ¨¡å—
 }
 
 
 u16 ADC_get_val(u8 channel)
 {
-	ADC_CONTR |= 0x40;        //Æô¶¯ AD ×ª»»
+	ADC_CONTR |= 0x40;        //å¯åŠ¨ AD è½¬æ¢
 	
 	ADC_CONTR &= ~(0xf);
 	ADC_CONTR |= channel;
 	
 	_nop_();
 	_nop_();
-	while (!(ADC_CONTR & 0x20));//²éÑ¯ ADC Íê³É±êÖ¾
-	ADC_CONTR &= ~0x20;         //ÇåÍê³É±êÖ¾
-	P2 = ADC_RES;               //¶ÁÈ¡ ADC ½á¹û
+	while (!(ADC_CONTR & 0x20));//æŸ¥è¯¢ ADC å®Œæˆæ ‡å¿—
+	ADC_CONTR &= ~0x20;         //æ¸…å®Œæˆæ ‡å¿—
+	P2 = ADC_RES;               //è¯»å– ADC ç»“æœ
 	return (ADC_RES<<4)|(ADC_RESL>>4);
 }
 
@@ -376,15 +382,15 @@ void Timer0_Isr(void) interrupt 1
 	}
 }
 
-void Timer0_Init(void)		//1000Î¢Ãë@40.000MHz
+void Timer0_Init(void)		//1000å¾®ç§’@40.000MHz
 {
-	AUXR |= 0x80;			//¶¨Ê±Æ÷Ê±ÖÓ1TÄ£Ê½
-	TMOD &= 0xF0;			//ÉèÖÃ¶¨Ê±Æ÷Ä£Ê½
-	TL0 = 0xC0;				//ÉèÖÃ¶¨Ê±³õÊ¼Öµ
-	TH0 = 0x63;				//ÉèÖÃ¶¨Ê±³õÊ¼Öµ
-	TF0 = 0;				//Çå³ıTF0±êÖ¾
-	TR0 = 1;				//¶¨Ê±Æ÷0¿ªÊ¼¼ÆÊ±
-	ET0 = 1;				//Ê¹ÄÜ¶¨Ê±Æ÷0ÖĞ¶Ï
+	AUXR |= 0x80;			//å®šæ—¶å™¨æ—¶é’Ÿ1Tæ¨¡å¼
+	TMOD &= 0xF0;			//è®¾ç½®å®šæ—¶å™¨æ¨¡å¼
+	TL0 = 0xC0;				//è®¾ç½®å®šæ—¶åˆå§‹å€¼
+	TH0 = 0x63;				//è®¾ç½®å®šæ—¶åˆå§‹å€¼
+	TF0 = 0;				//æ¸…é™¤TF0æ ‡å¿—
+	TR0 = 1;				//å®šæ—¶å™¨0å¼€å§‹è®¡æ—¶
+	ET0 = 1;				//ä½¿èƒ½å®šæ—¶å™¨0ä¸­æ–­
 }
 
 
