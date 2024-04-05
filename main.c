@@ -14,7 +14,7 @@ u8 KEY1_DOWN=0,KEY2_DOWN=0;
 //  adc
 //  |
 //	|____temp
-//
+// 当前温度曲线为西安头
 #define TEMPMAPNUM 10
 static struct temperature_map{
 	int temp;
