@@ -22,15 +22,15 @@ static struct temperature_map{
 	float k;
 	float b;
 }temp_map[TEMPMAPNUM] = {{0,0},
-						{50,100},
-						{100,200},
-						{150,300},
-						{200,400},
-						{250,500},
-						{300,600},
-						{350,750},
-						{400,800},
-						{450,850}};
+						{50,90},
+						{100,254},
+						{150,350},
+						{200,488},
+						{250,620},
+						{300,786},
+						{350,922},
+						{400,1060},
+						{450,1250}};
 	
 #define ADCARRAYNUM 5       //t12 adc数组
 #define SLEEPTIME   300     //休眠时间（秒）
@@ -79,6 +79,13 @@ int main()
 	OLED_ShowString(72,1,"Pow:",8);
 	OLED_ShowString(72,2,"Slp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
+	
+	
+	//计算当前电源电压并显示
+	powerval = ADC_get_val(1);
+	powerval = (powerval*3300)/4096;
+	powerval = powerval/1000*11.2;
+	OLED_ShowNum(102,1,powerval*10,3,8);
 	
 	
 	while(1)
@@ -155,6 +162,8 @@ int main()
 			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
 			//显示当前温度
 			OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
+			//显示原始adc值
+			//OLED_ShowNum(32,0,t12adc_average,4,16);
 
 			//计算运算放大器输出电压 && 填充数组
 			t12adc_val[t12adc_i] = ADC_get_val(0);
