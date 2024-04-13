@@ -14,7 +14,7 @@ u8 KEY1_DOWN=0,KEY2_DOWN=0;
 //  adc
 //  |
 //	|____temp
-//
+// 当前温度曲线为西安头
 #define TEMPMAPNUM 10
 static struct temperature_map{
 	int temp;
@@ -79,9 +79,15 @@ int main()
 	OLED_ShowString(72,1,"Pow:",8);
 	OLED_ShowString(72,2,"Slp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
-	
-	
+
+
 	//计算当前电源电压并显示
+	powerval = ADC_get_val(1);
+	powerval = (powerval*3300)/4096;
+	powerval = powerval/1000*11.2;
+	OLED_ShowNum(102,1,powerval*10,3,8);
+	
+	//
 	powerval = ADC_get_val(1);
 	powerval = (powerval*3300)/4096;
 	powerval = powerval/1000*11.2;
@@ -162,7 +168,7 @@ int main()
 			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
 			//显示当前温度
 			OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
-			//显示原始adc值
+			//adc
 			//OLED_ShowNum(32,0,t12adc_average,4,16);
 
 			//计算运算放大器输出电压 && 填充数组
