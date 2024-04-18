@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   52          #if 1
   53          int main()
   54          {
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 2   
 
   55   1              s16 PWMVAL = 0, pwmtime = 0;
   56   1              float powerval=0;
@@ -126,7 +126,7 @@ line level    source
  113   2                      if(pwmtime==2501)  //40*2500=100000us = 100ms = 10Hz
  114   2                      {
  115   3                              pwmtime = 0;
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 3   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 3   
 
  116   3                              //¾²Ö¹Ê±¼ä¼ì²â
  117   3                              mpu_data = GetData(MPU_GYRO_YOUTH_REG);
@@ -190,7 +190,7 @@ line level    source
  175   3                              t12adc_val[t12adc_i] = ADC_get_val(0);
  176   3                              t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
  177   3                              t12adc_i++;
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 4   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 4   
 
  178   3                              if(t12adc_i==ADCARRAYNUM)
  179   3                                      t12adc_i = 0;
@@ -254,7 +254,7 @@ line level    source
                               }
                               else
                               {
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 5   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 5   
 
                                       OLED_ShowString(0,0,"+",8);
                               }
@@ -318,7 +318,7 @@ line level    source
  298   1      }
  299          
  300          
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 6   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 6   
 
  301          u16 ADC_get_val(u8 channel)
  302          {
@@ -382,7 +382,7 @@ line level    source
  360   1              
  361   1              derror = error - lasterror;
  362   1              pwmval = PVAL*error + IVAL*integralval + DVAL*derror;
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 7   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 7   
 
  363   1              lasterror = error;
  364   1              
@@ -446,7 +446,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
-C51 COMPILER V9.60.7.0   MAIN                                                              04/13/2024 21:07:26 PAGE 8   
+C51 COMPILER V9.60.7.0   MAIN                                                              04/16/2024 22:55:50 PAGE 8   
 
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

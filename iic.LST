@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   IIC                                                               04/04/2024 23:25:10 PAGE 1   
+C51 COMPILER V9.60.7.0   IIC                                                               04/16/2024 22:55:51 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE IIC
@@ -62,7 +62,7 @@ line level    source
   52          {
   53   1              u16 time=0;
   54   1              SDA=1;
-C51 COMPILER V9.60.7.0   IIC                                                               04/04/2024 23:25:10 PAGE 2   
+C51 COMPILER V9.60.7.0   IIC                                                               04/16/2024 22:55:51 PAGE 2   
 
   55   1              delay_us(1);
   56   1              SCL=1;
@@ -126,7 +126,7 @@ line level    source
  114          
  115          //发送一个字节
  116          //向SSD1306写入一个字节。
-C51 COMPILER V9.60.7.0   IIC                                                               04/04/2024 23:25:10 PAGE 3   
+C51 COMPILER V9.60.7.0   IIC                                                               04/16/2024 22:55:51 PAGE 3   
 
  117          //mode:数据/命令标志 0,表示命令;1,表示数据;
  118          void OLED_WR_Byte(u8 dat,u8 mode)
@@ -190,7 +190,7 @@ line level    source
  176          {
  177   1              OLED_WR_Byte(0xb0+y,OLED_CMD);
  178   1              OLED_WR_Byte(((x&0xf0)>>4)|0x10,OLED_CMD);
-C51 COMPILER V9.60.7.0   IIC                                                               04/04/2024 23:25:10 PAGE 4   
+C51 COMPILER V9.60.7.0   IIC                                                               04/16/2024 22:55:51 PAGE 4   
 
  179   1              OLED_WR_Byte((x&0x0f),OLED_CMD);
  180   1      }         
@@ -254,7 +254,7 @@ line level    source
  238   1              u32 result=1;    
  239   1              while(n--)result*=m;    
  240   1              return result;
-C51 COMPILER V9.60.7.0   IIC                                                               04/04/2024 23:25:10 PAGE 5   
+C51 COMPILER V9.60.7.0   IIC                                                               04/16/2024 22:55:51 PAGE 5   
 
  241   1      }                                 
  242          //显示数字
@@ -318,7 +318,7 @@ line level    source
  300   1              for(i=0;i<sizey;i++)
  301   1              {
  302   2                      OLED_Set_Pos(x,i+y);
-C51 COMPILER V9.60.7.0   IIC                                                               04/04/2024 23:25:10 PAGE 6   
+C51 COMPILER V9.60.7.0   IIC                                                               04/16/2024 22:55:51 PAGE 6   
 
  303   2          for(m=0;m<sizex;m++)
  304   2                      {      
@@ -382,7 +382,7 @@ line level    source
  362   1          SSD1306_WRITECOMMAND(0x1F); // -- from default 63 to 31 (i.e. 32MUX)
  363   1          SSD1306_WRITECOMMAND(0xD3); // Set display offset
  364   1          SSD1306_WRITECOMMAND(0x00); // -- no offset
-C51 COMPILER V9.60.7.0   IIC                                                               04/04/2024 23:25:10 PAGE 7   
+C51 COMPILER V9.60.7.0   IIC                                                               04/16/2024 22:55:51 PAGE 7   
 
  365   1          SSD1306_WRITECOMMAND(0x40); // Set display start line
  366   1          SSD1306_WRITECOMMAND(0xA0); // Set segment re-map, column address 127 is mapped to SEG0   0xa0左右反  
