@@ -86,26 +86,14 @@ int main()
 	OLED_ShowString(72,1,"Pow:",8);
 	OLED_ShowString(72,2,"Slp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
-
-
-	//计算当前电源电压并显示
-	powerval = ADC_get_val(1);
-	powerval = (powerval*3300)/4096;
-	powerval = powerval/1000*11.2;
-	OLED_ShowNum(102,1,powerval*10,3,8);
-	
-	//
-	powerval = ADC_get_val(1);
-	powerval = (powerval*3300)/4096;
-	powerval = powerval/1000*11.2;
-	OLED_ShowNum(102,1,powerval*10,3,8);
 	
 	
 	while(1)
 	{
 		ET1 = 0;  //关闭定时器1中断
+		pwmtime=0;
 		T12SWITCHOFF; //关闭加热
-		delay_us(250);
+		delay_us(450);
 		//计算运算放大器输出电压 && 填充数组
 		t12adc_val[t12adc_i] = ADC_get_val(0);
 		t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
@@ -113,6 +101,30 @@ int main()
 		if(t12adc_i==ADCARRAYNUM)
 			t12adc_i = 0;
 		ET1 = 1;  //使能定时器1中断
+		
+		
+		//根据设定的温度获取T12热电偶电压值（adc值）
+		adc_want = temp2adcval(temp_want);
+
+		//adc滤波数组去掉最大最小值，求均值
+		t12adc_max=t12adc_val[0];
+		t12adc_min=t12adc_val[0];
+		t12adc_all = 0;
+		for(i=0;i<ADCARRAYNUM;i++)
+		{
+			if(t12adc_val[i]<t12adc_min)
+				t12adc_min = t12adc_val[i];
+			if(t12adc_val[i]>t12adc_max)
+				t12adc_max = t12adc_val[i];
+			t12adc_all += t12adc_val[i];
+		}
+		t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
+		//PID控制PWM加热占空比
+		PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2000);
+		//显示当前温度
+		OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
+		//显示当前adc值
+		//OLED_ShowNum(32,0,t12adc_average,4,16);
 		
 		
 		//静止时间检测
@@ -138,34 +150,12 @@ int main()
 		//计算当前电源电压并显示
 		powerval = ADC_get_val(1);
 		powerval = (powerval*3300)/4096;
-		powerval = powerval/10000*100;
+		powerval = powerval/1000*11.2;
 		OLED_ShowNum(102,1,powerval*10,3,8);
 		//显示静置时长
 		OLED_ShowNum(102,2,mpu_time/PWMHZ,3,8);
 		
 
-		//根据设定的温度获取T12热电偶电压值（adc值）
-		adc_want = temp2adcval(temp_want);
-
-		//adc滤波数组去掉最大最小值，求均值
-		t12adc_max=t12adc_val[0];
-		t12adc_min=t12adc_val[0];
-		t12adc_all = 0;
-		for(i=0;i<ADCARRAYNUM;i++)
-		{
-			if(t12adc_val[i]<t12adc_min)
-				t12adc_min = t12adc_val[i];
-			if(t12adc_val[i]>t12adc_max)
-				t12adc_max = t12adc_val[i];
-			t12adc_all += t12adc_val[i];
-		}
-		t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
-		//PID控制PWM加热占空比
-		PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2000);
-		//显示当前温度
-		OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
-		//显示当前adc值
-		//OLED_ShowNum(32,0,t12adc_average,4,16);
 		
 		//按键检测
 		if(KEY1_DOWN&&KEY2_DOWN)  //同时按下
@@ -334,9 +324,9 @@ u16 adc2tempval(u16 adcval)
 }
 
 
-#define PVAL  25.0F
+#define PVAL  16.0F
 #define IVAL  0.82F
-#define DVAL  1.20F
+#define DVAL  0.70F
 #define INTEGRAL 1200
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax)
 {
