@@ -1,10 +1,10 @@
-C51 COMPILER V9.60.7.0   SYS                                                               04/04/2024 23:25:10 PAGE 1   
+C51 COMPILER V9.60.7.0   SYS                                                               04/29/2024 08:52:22 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE SYS
 OBJECT MODULE PLACED IN .\outputs\sys.obj
-COMPILER INVOKED BY: D:\keil5\C51\BIN\C51.EXE sys.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND OBJECT(.\outputs\s
-                    -ys.obj)
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE sys.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND OBJECT(.\outputs
+                    -\sys.obj)
 
 line level    source
 

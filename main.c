@@ -87,11 +87,6 @@ int main()
 	powerval = powerval/1000*11.2;
 	OLED_ShowNum(102,1,powerval*10,3,8);
 	
-	//
-	powerval = ADC_get_val(1);
-	powerval = (powerval*3300)/4096;
-	powerval = powerval/1000*11.2;
-	OLED_ShowNum(102,1,powerval*10,3,8);
 	
 	
 	while(1)
