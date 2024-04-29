@@ -60,8 +60,14 @@ int main()
 	u8 i;
 	
 
-	for(i=0;i<TEMPMAPNUM-1;i++)
+	for(i=0;i<TEMPMAPNUM;i++)
 	{
+		if(i==TEMPMAPNUM-1)
+        {
+            temp_map[i].k = temp_map[i-1].k;
+            temp_map[i].b = temp_map[i-1].b;
+            break;
+        }
 		temp_map[i].k = (temp_map[i+1].adc-temp_map[i].adc)/50.0f;
 		temp_map[i].b = temp_map[i].adc-temp_map[i].k*temp_map[i].temp;
 	}
