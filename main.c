@@ -60,14 +60,20 @@ s16 abs(s16 num);
 int main()
 {
 	float powerval=0;
-	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
+	u16 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
 	u16 temp_want = 350,temp_set=350,adc_want;
 	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time=0,mpu_temp;
 	u8 i;
 	
 
-	for(i=0;i<TEMPMAPNUM-1;i++)
+	for(i=0;i<TEMPMAPNUM;i++)
 	{
+		if(i==TEMPMAPNUM-1)
+        {
+            temp_map[i].k = temp_map[i-1].k;
+            temp_map[i].b = temp_map[i-1].b;
+            break;
+        }
 		temp_map[i].k = (temp_map[i+1].adc-temp_map[i].adc)/50.0f;
 		temp_map[i].b = temp_map[i].adc-temp_map[i].k*temp_map[i].temp;
 	}
@@ -94,6 +100,8 @@ int main()
 		pwmtime=0;
 		T12SWITCHOFF; //关闭加热
 		delay_us(450);
+		//根据设定的温度获取T12热电偶电压值（adc值）
+		adc_want = temp2adcval(temp_want);
 		//计算运算放大器输出电压 && 填充数组
 		t12adc_val[t12adc_i] = ADC_get_val(0);
 		t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
@@ -102,9 +110,6 @@ int main()
 			t12adc_i = 0;
 		ET1 = 1;  //使能定时器1中断
 		
-		
-		//根据设定的温度获取T12热电偶电压值（adc值）
-		adc_want = temp2adcval(temp_want);
 
 		//adc滤波数组去掉最大最小值，求均值
 		t12adc_max=t12adc_val[0];

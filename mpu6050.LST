@@ -1,10 +1,10 @@
-C51 COMPILER V9.60.7.0   MPU6050                                                           04/18/2024 20:24:08 PAGE 1   
+C51 COMPILER V9.60.7.0   MPU6050                                                           04/19/2024 15:20:00 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MPU6050
 OBJECT MODULE PLACED IN .\outputs\mpu6050.obj
-COMPILER INVOKED BY: D:\keil5\C51\BIN\C51.EXE mpu6050.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND OBJECT(.\outpu
-                    -ts\mpu6050.obj)
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE mpu6050.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND OBJECT(.\out
+                    -puts\mpu6050.obj)
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   52   1              return MPU_Write_Byte(MPU_ACCEL_CFG_REG,fsr<<3);//设置加速度传感器满量程范围  
   53   1      }
   54          //设置MPU6050的数字低通滤波器
-C51 COMPILER V9.60.7.0   MPU6050                                                           04/18/2024 20:24:08 PAGE 2   
+C51 COMPILER V9.60.7.0   MPU6050                                                           04/19/2024 15:20:00 PAGE 2   
 
   55          //lpf:数字低通滤波频率(Hz)
   56          //返回值:0,设置成功
@@ -126,7 +126,7 @@ line level    source
  114   1              u8 H,L;
  115   1              H=MPU_Read_Byte(REG_Address);
  116   1              L=MPU_Read_Byte(REG_Address+1);
-C51 COMPILER V9.60.7.0   MPU6050                                                           04/18/2024 20:24:08 PAGE 3   
+C51 COMPILER V9.60.7.0   MPU6050                                                           04/19/2024 15:20:00 PAGE 3   
 
  117   1              return ((H<<8)+L);   //合成数据
  118   1      }
