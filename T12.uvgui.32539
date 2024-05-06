@@ -1865,9 +1865,9 @@
       <ActiveTab>0</ActiveTab>
       <Doc>
         <Name>.\main.c</Name>
-        <ColumnNumber>34</ColumnNumber>
-        <TopLine>100</TopLine>
-        <CurrentLine>32</CurrentLine>
+        <ColumnNumber>10</ColumnNumber>
+        <TopLine>34</TopLine>
+        <CurrentLine>35</CurrentLine>
         <Folding>1</Folding>
         <ContractedFolders></ContractedFolders>
         <PaneID>0</PaneID>
@@ -1883,7 +1883,7 @@
       </Doc>
       <Doc>
         <Name>mpu6050.h</Name>
-        <ColumnNumber>17</ColumnNumber>
+        <ColumnNumber>10</ColumnNumber>
         <TopLine>53</TopLine>
         <CurrentLine>81</CurrentLine>
         <Folding>1</Folding>
