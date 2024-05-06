@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:38:59 PAGE 1   
+C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:42:44 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE IIC
@@ -62,7 +62,7 @@ line level    source
   52          {
   53   1              u16 time=0;
   54   1              SDA=1;
-C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:38:59 PAGE 2   
+C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:42:44 PAGE 2   
 
   55   1              delay_us(1);
   56   1              SCL=1;
@@ -126,7 +126,7 @@ line level    source
  114          
  115          //发送一个字节
  116          //向SSD1306写入一个字节。
-C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:38:59 PAGE 3   
+C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:42:44 PAGE 3   
 
  117          //mode:数据/命令标志 0,表示命令;1,表示数据;
  118          void OLED_WR_Byte(u8 dat,u8 mode)
@@ -190,7 +190,7 @@ line level    source
  176          {
  177   1              OLED_WR_Byte(0xb0+y,OLED_CMD);
  178   1              OLED_WR_Byte(((x&0xf0)>>4)|0x10,OLED_CMD);
-C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:38:59 PAGE 4   
+C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:42:44 PAGE 4   
 
  179   1              OLED_WR_Byte((x&0x0f),OLED_CMD);
  180   1      }         
@@ -254,7 +254,7 @@ line level    source
  238   1              u32 result=1;    
  239   1              while(n--)result*=m;    
  240   1              return result;
-C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:38:59 PAGE 5   
+C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:42:44 PAGE 5   
 
  241   1      }                                 
  242          //显示数字
@@ -318,7 +318,7 @@ line level    source
  300   1              for(i=0;i<sizey;i++)
  301   1              {
  302   2                      OLED_Set_Pos(x,i+y);
-C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:38:59 PAGE 6   
+C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:42:44 PAGE 6   
 
  303   2          for(m=0;m<sizex;m++)
  304   2                      {      
@@ -337,85 +337,85 @@ line level    source
  317          //初始化                                    
  318          void OLED_Init(void)
  319          {
- 320   1          delay_ms(200);
- 321   1      
- 322   1      //      
- 323   1      //      OLED_WR_Byte(0xAE,OLED_CMD);//--display off
- 324   1      //      OLED_WR_Byte(0x00,OLED_CMD);//---set low column address
- 325   1      //      OLED_WR_Byte(0x10,OLED_CMD);//---set high column address
- 326   1      //      OLED_WR_Byte(0x40,OLED_CMD);//--set start line address  
- 327   1      //      OLED_WR_Byte(0xB0,OLED_CMD);//--set page address
- 328   1      //      OLED_WR_Byte(0x81,OLED_CMD); // contract control
- 329   1      //      OLED_WR_Byte(0xFF,OLED_CMD);//--128   
- 330   1      //      OLED_WR_Byte(0xA1,OLED_CMD);//set segment remap 
- 331   1      //      OLED_WR_Byte(0xA6,OLED_CMD);//--normal / reverse
- 332   1      //      OLED_WR_Byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
- 333   1      //      OLED_WR_Byte(0x3F,OLED_CMD);//--1/32 duty
- 334   1      //      OLED_WR_Byte(0xC8,OLED_CMD);//Com scan direction
- 335   1      //      OLED_WR_Byte(0xD3,OLED_CMD);//-set display offset
- 336   1      //      OLED_WR_Byte(0x00,OLED_CMD);//
- 337   1      //      
- 338   1      //      OLED_WR_Byte(0xD5,OLED_CMD);//set osc division
- 339   1      //      OLED_WR_Byte(0x80,OLED_CMD);//
- 340   1      //      
- 341   1      //      OLED_WR_Byte(0xD8,OLED_CMD);//set area color mode off
- 342   1      //      OLED_WR_Byte(0x05,OLED_CMD);//
- 343   1      //      
- 344   1      //      OLED_WR_Byte(0xD9,OLED_CMD);//Set Pre-Charge Period
- 345   1      //      OLED_WR_Byte(0xF1,OLED_CMD);//
- 346   1      //      
- 347   1      //      OLED_WR_Byte(0xDA,OLED_CMD);//set com pin configuartion
- 348   1      //      OLED_WR_Byte(0x12,OLED_CMD);//
- 349   1      //      
- 350   1      //      OLED_WR_Byte(0xDB,OLED_CMD);//set Vcomh
- 351   1      //      OLED_WR_Byte(0x20,OLED_CMD);//
- 352   1      //      
- 353   1      //      OLED_WR_Byte(0x8D,OLED_CMD);//set charge pump enable
- 354   1      //      OLED_WR_Byte(0x14,OLED_CMD);//
- 355   1      //      
- 356   1      //      OLED_WR_Byte(0xAF,OLED_CMD);//--turn on oled panel
- 357   1              
+ 320   1              RES=0;
+ 321   1          delay_ms(200);
+ 322   1              RES=1;
+ 323   1      //      
+ 324   1      //      OLED_WR_Byte(0xAE,OLED_CMD);//--display off
+ 325   1      //      OLED_WR_Byte(0x00,OLED_CMD);//---set low column address
+ 326   1      //      OLED_WR_Byte(0x10,OLED_CMD);//---set high column address
+ 327   1      //      OLED_WR_Byte(0x40,OLED_CMD);//--set start line address  
+ 328   1      //      OLED_WR_Byte(0xB0,OLED_CMD);//--set page address
+ 329   1      //      OLED_WR_Byte(0x81,OLED_CMD); // contract control
+ 330   1      //      OLED_WR_Byte(0xFF,OLED_CMD);//--128   
+ 331   1      //      OLED_WR_Byte(0xA1,OLED_CMD);//set segment remap 
+ 332   1      //      OLED_WR_Byte(0xA6,OLED_CMD);//--normal / reverse
+ 333   1      //      OLED_WR_Byte(0xA8,OLED_CMD);//--set multiplex ratio(1 to 64)
+ 334   1      //      OLED_WR_Byte(0x3F,OLED_CMD);//--1/32 duty
+ 335   1      //      OLED_WR_Byte(0xC8,OLED_CMD);//Com scan direction
+ 336   1      //      OLED_WR_Byte(0xD3,OLED_CMD);//-set display offset
+ 337   1      //      OLED_WR_Byte(0x00,OLED_CMD);//
+ 338   1      //      
+ 339   1      //      OLED_WR_Byte(0xD5,OLED_CMD);//set osc division
+ 340   1      //      OLED_WR_Byte(0x80,OLED_CMD);//
+ 341   1      //      
+ 342   1      //      OLED_WR_Byte(0xD8,OLED_CMD);//set area color mode off
+ 343   1      //      OLED_WR_Byte(0x05,OLED_CMD);//
+ 344   1      //      
+ 345   1      //      OLED_WR_Byte(0xD9,OLED_CMD);//Set Pre-Charge Period
+ 346   1      //      OLED_WR_Byte(0xF1,OLED_CMD);//
+ 347   1      //      
+ 348   1      //      OLED_WR_Byte(0xDA,OLED_CMD);//set com pin configuartion
+ 349   1      //      OLED_WR_Byte(0x12,OLED_CMD);//
+ 350   1      //      
+ 351   1      //      OLED_WR_Byte(0xDB,OLED_CMD);//set Vcomh
+ 352   1      //      OLED_WR_Byte(0x20,OLED_CMD);//
+ 353   1      //      
+ 354   1      //      OLED_WR_Byte(0x8D,OLED_CMD);//set charge pump enable
+ 355   1      //      OLED_WR_Byte(0x14,OLED_CMD);//
+ 356   1      //      
+ 357   1      //      OLED_WR_Byte(0xAF,OLED_CMD);//--turn on oled panel
  358   1              
- 359   1       /* Init LCD */
- 360   1          SSD1306_WRITECOMMAND(0xAE); // Set display off
- 361   1          SSD1306_WRITECOMMAND(0xA8); // Set multiplex ratio
- 362   1          SSD1306_WRITECOMMAND(0x1F); // -- from default 63 to 31 (i.e. 32MUX)
- 363   1          SSD1306_WRITECOMMAND(0xD3); // Set display offset
- 364   1          SSD1306_WRITECOMMAND(0x00); // -- no offset
-C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:38:59 PAGE 7   
+ 359   1              
+ 360   1       /* Init LCD */
+ 361   1          SSD1306_WRITECOMMAND(0xAE); // Set display off
+ 362   1          SSD1306_WRITECOMMAND(0xA8); // Set multiplex ratio
+ 363   1          SSD1306_WRITECOMMAND(0x1F); // -- from default 63 to 31 (i.e. 32MUX)
+ 364   1          SSD1306_WRITECOMMAND(0xD3); // Set display offset
+C51 COMPILER V9.60.7.0   IIC                                                               05/06/2024 21:42:44 PAGE 7   
 
- 365   1          SSD1306_WRITECOMMAND(0x40); // Set display start line
- 366   1          SSD1306_WRITECOMMAND(0xA0); // Set segment re-map, column address 127 is mapped to SEG0   0xa0左右反  
+ 365   1          SSD1306_WRITECOMMAND(0x00); // -- no offset
+ 366   1          SSD1306_WRITECOMMAND(0x40); // Set display start line
+ 367   1          SSD1306_WRITECOMMAND(0xA0); // Set segment re-map, column address 127 is mapped to SEG0   0xa0左右反  
              -0xa1正常
- 367   1          SSD1306_WRITECOMMAND(0xC0); // Set COM output scan direction - remapped mode              0xc0上下反  
+ 368   1          SSD1306_WRITECOMMAND(0xC0); // Set COM output scan direction - remapped mode              0xc0上下反  
              -0xc8正常
- 368   1          SSD1306_WRITECOMMAND(0x81); // Set contrast control for BANK0
- 369   1          SSD1306_WRITECOMMAND(0x7F); // -- range 0x00 to 0xFF => 50%
- 370   1          SSD1306_WRITECOMMAND(0xA4); // Enable display outputs according to the GDDRAM contents.
- 371   1          SSD1306_WRITECOMMAND(0xA6); // Set normal display
- 372   1          SSD1306_WRITECOMMAND(0xD5); // Set display clock divide ration and oscillator frequency
- 373   1          SSD1306_WRITECOMMAND(0x80); // -- frequency (1000 - default); display clock divide ratio (0000 - divid
+ 369   1          SSD1306_WRITECOMMAND(0x81); // Set contrast control for BANK0
+ 370   1          SSD1306_WRITECOMMAND(0x7F); // -- range 0x00 to 0xFF => 50%
+ 371   1          SSD1306_WRITECOMMAND(0xA4); // Enable display outputs according to the GDDRAM contents.
+ 372   1          SSD1306_WRITECOMMAND(0xA6); // Set normal display
+ 373   1          SSD1306_WRITECOMMAND(0xD5); // Set display clock divide ration and oscillator frequency
+ 374   1          SSD1306_WRITECOMMAND(0x80); // -- frequency (1000 - default); display clock divide ratio (0000 - divid
              -e ration 1)
- 374   1          SSD1306_WRITECOMMAND(0x8D); // Charge pump setting
- 375   1          SSD1306_WRITECOMMAND(0x14); // -- enable charge pump
- 376   1      
- 377   1          SSD1306_WRITECOMMAND(0x2E); // Deactivate scroll
- 378   1          SSD1306_WRITECOMMAND(0x20); // Set memory addressing mode
- 379   1          SSD1306_WRITECOMMAND(0x10); // -- Page Addressing Mode (RESET)
- 380   1          SSD1306_WRITECOMMAND(0xDA); // Set COM pins hardware configuration
- 381   1          SSD1306_WRITECOMMAND(0x02); // --
- 382   1          SSD1306_WRITECOMMAND(0xD9); // Set pre-charge period
- 383   1          SSD1306_WRITECOMMAND(0x22); // --
- 384   1          SSD1306_WRITECOMMAND(0xDB); // Set Vcomh deselect level
- 385   1          SSD1306_WRITECOMMAND(0x20); // -- 0.77 x Vcc (RESET)
- 386   1      
- 387   1          SSD1306_WRITECOMMAND(0xB0); // Set page start address for page addressing mode
- 388   1          SSD1306_WRITECOMMAND(0x00); // Set lower column start address for page addressing mode
- 389   1          SSD1306_WRITECOMMAND(0x10); // Set higher column start address for page addressing mode
- 390   1      
- 391   1          SSD1306_WRITECOMMAND(0xAF); // Set display on
- 392   1              
- 393   1              delay_ms(300);
+ 375   1          SSD1306_WRITECOMMAND(0x8D); // Charge pump setting
+ 376   1          SSD1306_WRITECOMMAND(0x14); // -- enable charge pump
+ 377   1      
+ 378   1          SSD1306_WRITECOMMAND(0x2E); // Deactivate scroll
+ 379   1          SSD1306_WRITECOMMAND(0x20); // Set memory addressing mode
+ 380   1          SSD1306_WRITECOMMAND(0x10); // -- Page Addressing Mode (RESET)
+ 381   1          SSD1306_WRITECOMMAND(0xDA); // Set COM pins hardware configuration
+ 382   1          SSD1306_WRITECOMMAND(0x02); // --
+ 383   1          SSD1306_WRITECOMMAND(0xD9); // Set pre-charge period
+ 384   1          SSD1306_WRITECOMMAND(0x22); // --
+ 385   1          SSD1306_WRITECOMMAND(0xDB); // Set Vcomh deselect level
+ 386   1          SSD1306_WRITECOMMAND(0x20); // -- 0.77 x Vcc (RESET)
+ 387   1      
+ 388   1          SSD1306_WRITECOMMAND(0xB0); // Set page start address for page addressing mode
+ 389   1          SSD1306_WRITECOMMAND(0x00); // Set lower column start address for page addressing mode
+ 390   1          SSD1306_WRITECOMMAND(0x10); // Set higher column start address for page addressing mode
+ 391   1      
+ 392   1          SSD1306_WRITECOMMAND(0xAF); // Set display on
+ 393   1              
  394   1              OLED_Clear();
  395   1      }
  396          
@@ -425,7 +425,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1653    ----
+   CODE SIZE        =   1650    ----
    CONSTANT SIZE    =   2296    ----
    XDATA SIZE       =   ----      63
    PDATA SIZE       =   ----    ----

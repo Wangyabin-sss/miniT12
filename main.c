@@ -9,6 +9,12 @@ sbit KEY2   = P3^2;
 
 u8 _K1 = 0,_K2 = 0;
 u8 KEY1_DOWN=0,KEY2_DOWN=0;
+s16 PWMVAL = 0, pwmtime = 0;
+
+
+#define T12SWITCHON     do{SWITCH = 1;LED = 0;}while(0)
+#define T12SWITCHOFF	 do{SWITCH = 0;LED = 1;}while(0)
+
 
 //运放电压与温度对应表  0  50  100  150  200  250  300  350  400  450
 //  adc
@@ -32,11 +38,11 @@ static struct temperature_map{
 						{400,1060},
 						{450,1250}};
 	
-#define ADCARRAYNUM 5       //t12 adc数组
+#define ADCARRAYNUM 5       //t12 adc均值滤波数组
 #define SLEEPTIME   300     //休眠时间（秒）
 #define CLOSETIME   600     //关闭时间（秒）
 #define MPUGRYLIEMT 20      //mpu6050震动范围（判断静置状态）
-#define PWMHZ       10      //当前加热频率
+#define PWMHZ       20      //当前加热频率
 
 
 void gpio_init(void);
@@ -46,17 +52,17 @@ u16 temp2adcval(u16 temperature);
 u16 adc2tempval(u16 adcval);
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax);
 void Timer0_Init(void);
+void Timer1_Init(void);
 s16 abs(s16 num);
 						
 						
 #if 1
 int main()
 {
-	s16 PWMVAL = 0, pwmtime = 0;
 	float powerval=0;
 	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
 	u16 temp_want = 350,temp_set=350,adc_want;
-	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time,mpu_temp;
+	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time=0,mpu_temp;
 	u8 i;
 	
 
@@ -76,6 +82,7 @@ int main()
 	OLED_Init();
 	ADC_init();
 	Timer0_Init();
+	Timer1_Init();
 	InitMPU6050();
 	
 	EA = 1;
@@ -85,126 +92,104 @@ int main()
 	OLED_ShowString(72,1,"Pow:",8);
 	OLED_ShowString(72,2,"Slp:",8);
 	OLED_ShowNum(102,0,temp_want,3,8);
-
-
-	//计算当前电源电压并显示
-	powerval = ADC_get_val(1);
-	powerval = (powerval*3300)/4096;
-	powerval = powerval/1000*11.2;
-	OLED_ShowNum(102,1,powerval*10,3,8);
-	
 	
 	
 	while(1)
 	{
-		//加热
-		if(pwmtime<PWMVAL)
+		ET1 = 0;  //关闭定时器1中断
+		pwmtime=0;
+		T12SWITCHOFF; //关闭加热
+		delay_us(450);
+		//根据设定的温度获取T12热电偶电压值（adc值）
+		adc_want = temp2adcval(temp_want);
+		//计算运算放大器输出电压 && 填充数组
+		t12adc_val[t12adc_i] = ADC_get_val(0);
+		t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
+		t12adc_i++;
+		if(t12adc_i==ADCARRAYNUM)
+			t12adc_i = 0;
+		ET1 = 1;  //使能定时器1中断
+		
+
+		//adc滤波数组去掉最大最小值，求均值
+		t12adc_max=t12adc_val[0];
+		t12adc_min=t12adc_val[0];
+		t12adc_all = 0;
+		for(i=0;i<ADCARRAYNUM;i++)
 		{
-			SWITCH = 1;
-			LED = 0;
+			if(t12adc_val[i]<t12adc_min)
+				t12adc_min = t12adc_val[i];
+			if(t12adc_val[i]>t12adc_max)
+				t12adc_max = t12adc_val[i];
+			t12adc_all += t12adc_val[i];
 		}
-		//断开
+		t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
+		//PID控制PWM加热占空比
+		PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2000);
+		//显示当前温度
+		OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
+		//显示当前adc值
+		//OLED_ShowNum(32,0,t12adc_average,4,16);
+		
+		
+		//静止时间检测
+		mpu_data = GetData(MPU_GYRO_YOUTH_REG);
+		mpu_data_diff = mpu_data - mpu_data_last;
+		mpu_data_last = mpu_data;
+		if(abs(mpu_data_diff)<MPUGRYLIEMT)
+		{
+			mpu_time++;
+		}
 		else
-		{
-			SWITCH = 0;
-			LED = 1;
-		}
-		delay_us(40);
-		pwmtime++;
-		if(pwmtime==2501)  //40*2500=100000us = 100ms = 10Hz
-		{
-			pwmtime = 0;
-			//静止时间检测
-			mpu_data = GetData(MPU_GYRO_YOUTH_REG);
-			mpu_data_diff = mpu_data - mpu_data_last;
-			mpu_data_last = mpu_data;
-			if(abs(mpu_data_diff)<MPUGRYLIEMT)
-			{
-				mpu_time++;
-			}
-			else
-				mpu_time=0;
+			mpu_time=0;
+		
+		//休眠、关闭、加热状态切换
+		if(mpu_time/PWMHZ>CLOSETIME)
+			temp_want = 0;
+		else if(mpu_time/PWMHZ>SLEEPTIME)
+			temp_want = 200;
+		else
+			temp_want = temp_set;
 			
-			//休眠、关闭、加热状态切换
-			if(mpu_time/PWMHZ>CLOSETIME)
+
+		//计算当前电源电压并显示
+		powerval = ADC_get_val(1);
+		powerval = (powerval*3300)/4096;
+		powerval = powerval/1000*11.2;
+		OLED_ShowNum(102,1,powerval*10,3,8);
+		//显示静置时长
+		OLED_ShowNum(102,2,mpu_time/PWMHZ,3,8);
+		
+
+		
+		//按键检测
+		if(KEY1_DOWN&&KEY2_DOWN)  //同时按下
+		{
+			KEY1_DOWN = 0;
+			KEY2_DOWN = 0;
+			
+		}
+		if(KEY1_DOWN)   //KEY1按下
+		{
+			temp_want+=KEY1_DOWN;
+			if(temp_want>450)
+				temp_want = 450;
+			temp_set = temp_want;
+			OLED_ShowNum(102,0,temp_want,3,8);
+			KEY1_DOWN = 0;
+		}
+		if(KEY2_DOWN)  //KEY2按下
+		{
+			temp_want-=KEY2_DOWN;
+			if(temp_want<0)
 				temp_want = 0;
-			else if(mpu_time/PWMHZ>SLEEPTIME)
-				temp_want = 200;
-			else
-				temp_want = temp_set;
-				
-			
-			//非全速加热时显示一些非必要数据
-			if((2500-PWMVAL)>1000)
-			{
-//				//计算当前电源电压并显示
-//				powerval = ADC_get_val(1);
-//				powerval = (powerval*3300)/4096;
-//				powerval = powerval/10000*100;
-//				OLED_ShowNum(102,1,powerval*10,3,8);
-//				//mpu6050温度传感器温度
-//				mpu_temp = MPU_Get_Temperature();
-//				OLED_ShowNum(102,2,mpu_temp,3,8);
-				//显示静置时长
-				OLED_ShowNum(102,2,mpu_time/PWMHZ,3,8);
-			}
-
-			//根据设定的温度获取T12热电偶电压值（adc值）
-			adc_want = temp2adcval(temp_want);
-
-			//adc滤波数组去掉最大最小值，求均值
-			t12adc_max=t12adc_val[0];
-			t12adc_min=t12adc_val[0];
-			t12adc_all = 0;
-			for(i=0;i<ADCARRAYNUM;i++)
-			{
-				if(t12adc_val[i]<t12adc_min)
-					t12adc_min = t12adc_val[i];
-				if(t12adc_val[i]>t12adc_max)
-					t12adc_max = t12adc_val[i];
-				t12adc_all += t12adc_val[i];
-			}
-			t12adc_average = (t12adc_all-t12adc_max-t12adc_min)/(ADCARRAYNUM-2);
-			//PID控制PWM加热占空比
-			PWMVAL = get_pwmval_with_pid(t12adc_average,adc_want,2500);
-			//显示当前温度
-			OLED_ShowNum(32,0,adc2tempval(t12adc_average),3,16);
-			//adc
-			//OLED_ShowNum(32,0,t12adc_average,4,16);
-
-			//计算运算放大器输出电压 && 填充数组
-			t12adc_val[t12adc_i] = ADC_get_val(0);
-			t12adc_val[t12adc_i] = (t12adc_val[t12adc_i]*3300)/4096;
-			t12adc_i++;
-			if(t12adc_i==ADCARRAYNUM)
-				t12adc_i = 0;
-			
-			//按键检测
-			if(KEY1_DOWN&&KEY2_DOWN)  //同时按下
-			{
-				KEY1_DOWN = 0;
-				KEY2_DOWN = 0;
-				
-			}
-			if(KEY1_DOWN)   //KEY1按下
-			{
-				temp_want+=KEY1_DOWN;
-				if(temp_want>450)
-					temp_want = 450;
-				temp_set = temp_want;
-				OLED_ShowNum(102,0,temp_want,3,8);
-				KEY1_DOWN = 0;
-			}
-			if(KEY2_DOWN)  //KEY2按下
-			{
-				temp_want-=KEY2_DOWN;
-				if(temp_want<0)
-					temp_want = 0;
-				temp_set = temp_want;
-				OLED_ShowNum(102,0,temp_want,3,8);
-				KEY2_DOWN = 0;
-			}
+			temp_set = temp_want;
+			OLED_ShowNum(102,0,temp_want,3,8);
+			KEY2_DOWN = 0;
 		}
+		
+		
+		delay_ms(50);
 	}
 }
 #else
@@ -276,6 +261,9 @@ void gpio_init(void)
 	P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED & SWITCH
 	P3M1 &= ~(3<<5);
 	
+	P1M0 |= (1<<6);    //设置 P1.6为推挽模式   oled_res
+	P1M1 &= ~(1<<6);
+	
 	P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
 	P1M1 |= (3<<4);
 	
@@ -344,10 +332,10 @@ u16 adc2tempval(u16 adcval)
 }
 
 
-#define PVAL  25.0F
+#define PVAL  16.0F
 #define IVAL  0.82F
-#define DVAL  1.20F
-#define INTEGRAL 1500
+#define DVAL  0.70F
+#define INTEGRAL 1200
 int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax)
 {
 	static s16  lasterror=0, integralval=0;
@@ -402,6 +390,35 @@ void Timer0_Init(void)		//1000微秒@40.000MHz
 	TR0 = 1;				//定时器0开始计时
 	ET0 = 1;				//使能定时器0中断
 }
+
+void TM1_Isr() interrupt 3
+{
+	//加热
+	if(pwmtime<=PWMVAL)
+	{
+		T12SWITCHON;
+	}
+	//断开
+	else
+	{
+		T12SWITCHOFF;
+	}
+	pwmtime++;
+	if(pwmtime>2000)
+		pwmtime = 0;
+}
+
+void Timer1_Init(void)		//25微秒@40.000MHz
+{
+	AUXR |= 0x80;			//定时器时钟1T模式
+	TMOD &= 0x0F;			//设置定时器模式
+	TL1 = 0x18;				//设置定时初始值
+	TH1 = 0xFC;				//设置定时初始值
+	TF1 = 0;				//清除TF1标志
+	TR1 = 1;				//定时器1开始计时
+	ET1 = 1;				//使能定时器1中断
+}
+
 
 
 s16 abs(s16 num)

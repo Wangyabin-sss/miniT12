@@ -317,8 +317,9 @@ void SSD1306_WRITECOMMAND(u8 dat)
 //≥ı ºªØ				    
 void OLED_Init(void)
 {
+	RES=0;
     delay_ms(200);
-
+	RES=1;
 //	
 //	OLED_WR_Byte(0xAE,OLED_CMD);//--display off
 //	OLED_WR_Byte(0x00,OLED_CMD);//---set low column address
@@ -390,7 +391,6 @@ void OLED_Init(void)
 
     SSD1306_WRITECOMMAND(0xAF); // Set display on
 	
-	delay_ms(300);
 	OLED_Clear();
 }
 
