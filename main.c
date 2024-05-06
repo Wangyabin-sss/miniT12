@@ -60,7 +60,7 @@ s16 abs(s16 num);
 int main()
 {
 	float powerval=0;
-	u16 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
+	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
 	u16 temp_want = 350,temp_set=350,adc_want;
 	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time=0,mpu_temp;
 	u8 i;
@@ -260,6 +260,9 @@ void gpio_init(void)
 	
 	P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED & SWITCH
 	P3M1 &= ~(3<<5);
+	
+	P1M0 |= (1<<6);    //设置 P1.6为推挽模式   oled_res
+	P1M1 &= ~(1<<6);
 	
 	P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
 	P1M1 |= (3<<4);

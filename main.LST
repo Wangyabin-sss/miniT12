@@ -1,10 +1,10 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
 OBJECT MODULE PLACED IN .\outputs\main.obj
-COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND OBJECT(.\output
-                    -s\main.obj)
+COMPILER INVOKED BY: D:\keil5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND OBJECT(.\outputs\
+                    -main.obj)
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   52          u16 adc2tempval(u16 adcval);
   53          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax);
   54          void Timer0_Init(void);
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 2   
 
   55          void Timer1_Init(void);
   56          s16 abs(s16 num);
@@ -72,7 +72,7 @@ line level    source
   60          int main()
   61          {
   62   1              float powerval=0;
-  63   1              u16 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //ad
+  63   1              u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //ad
              -c均值滤波  adc电压单位mV
   64   1              u16 temp_want = 350,temp_set=350,adc_want;
   65   1              s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time=0,mpu_temp;
@@ -126,7 +126,7 @@ line level    source
  113   2      
  114   2                      //adc滤波数组去掉最大最小值，求均值
  115   2                      t12adc_max=t12adc_val[0];
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 3   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 3   
 
  116   2                      t12adc_min=t12adc_val[0];
  117   2                      t12adc_all = 0;
@@ -190,7 +190,7 @@ line level    source
  175   3                              if(temp_want>450)
  176   3                                      temp_want = 450;
  177   3                              temp_set = temp_want;
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 4   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 4   
 
  178   3                              OLED_ShowNum(102,0,temp_want,3,8);
  179   3                              KEY1_DOWN = 0;
@@ -254,7 +254,7 @@ line level    source
                               OLED_ShowNum(10,1,powerval*10,3,8);
                               
                               if(flag==1)
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 5   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 5   
 
                               {
                                       SWITCH = 1;
@@ -281,185 +281,188 @@ line level    source
  261   1              P3M0 |= (3<<5);    //设置 P3.5  P3.6为推挽模式   LED & SWITCH
  262   1              P3M1 &= ~(3<<5);
  263   1              
- 264   1              P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
- 265   1              P1M1 |= (3<<4);
+ 264   1              P1M0 |= (1<<6);    //设置 P1.6为推挽模式   oled_res
+ 265   1              P1M1 &= ~(1<<6);
  266   1              
- 267   1              P1M0 &= ~(3<<0);   //设置 P1.0  P1.1为高阻输入   ADC
- 268   1              P1M1 |= (3<<0);
+ 267   1              P1M0 |= (3<<4);    //设置 P1.4  P1.5为开漏模式   IIC 带上拉电阻
+ 268   1              P1M1 |= (3<<4);
  269   1              
- 270   1              P3M0 &= ~(3<<2);    //设置 P3.2  P3.3为准双向模式   KEY
- 271   1              P3M1 &= ~(3<<2);
+ 270   1              P1M0 &= ~(3<<0);   //设置 P1.0  P1.1为高阻输入   ADC
+ 271   1              P1M1 |= (3<<0);
  272   1              
- 273   1              KEY1=1;
- 274   1              KEY2=1;
- 275   1              SCL=1;
- 276   1              SDA=1;
- 277   1      }
- 278          
- 279          void ADC_init(void)
- 280          {
- 281   1              ADCTIM = 0x3f;//设置 ADC 内部时序
- 282   1              ADCCFG = 0x0f;//设置 ADC 时钟为系统时钟/2/16
- 283   1              ADC_CONTR = 0x80;//使能 ADC 模块
- 284   1      }
- 285          
- 286          
- 287          u16 ADC_get_val(u8 channel)
- 288          {
- 289   1              ADC_CONTR |= 0x40;        //启动 AD 转换
- 290   1              
- 291   1              ADC_CONTR &= ~(0xf);
- 292   1              ADC_CONTR |= channel;
+ 273   1              P3M0 &= ~(3<<2);    //设置 P3.2  P3.3为准双向模式   KEY
+ 274   1              P3M1 &= ~(3<<2);
+ 275   1              
+ 276   1              KEY1=1;
+ 277   1              KEY2=1;
+ 278   1              SCL=1;
+ 279   1              SDA=1;
+ 280   1      }
+ 281          
+ 282          void ADC_init(void)
+ 283          {
+ 284   1              ADCTIM = 0x3f;//设置 ADC 内部时序
+ 285   1              ADCCFG = 0x0f;//设置 ADC 时钟为系统时钟/2/16
+ 286   1              ADC_CONTR = 0x80;//使能 ADC 模块
+ 287   1      }
+ 288          
+ 289          
+ 290          u16 ADC_get_val(u8 channel)
+ 291          {
+ 292   1              ADC_CONTR |= 0x40;        //启动 AD 转换
  293   1              
- 294   1              _nop_();
- 295   1              _nop_();
- 296   1              while (!(ADC_CONTR & 0x20));//查询 ADC 完成标志
- 297   1              ADC_CONTR &= ~0x20;         //清完成标志
- 298   1              P2 = ADC_RES;               //读取 ADC 结果
- 299   1              return (ADC_RES<<4)|(ADC_RESL>>4);
- 300   1      }
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 6   
+ 294   1              ADC_CONTR &= ~(0xf);
+ 295   1              ADC_CONTR |= channel;
+ 296   1              
+ 297   1              _nop_();
+ 298   1              _nop_();
+ 299   1              while (!(ADC_CONTR & 0x20));//查询 ADC 完成标志
+ 300   1              ADC_CONTR &= ~0x20;         //清完成标志
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 6   
 
- 301          
- 302          
- 303          u16 temp2adcval(u16 temperature)
- 304          {
- 305   1              u8 i=0;
- 306   1              
- 307   1              for(i=0;i<TEMPMAPNUM-1;i++)
- 308   1              {
- 309   2                      if(temperature>=temp_map[i].temp&&temperature<temp_map[i+1].temp)
- 310   2                      {
- 311   3                              return temp_map[i].k*temperature+temp_map[i].b;
- 312   3                      }
- 313   2              }
- 314   1              return temp_map[i].k*temperature+temp_map[i].b;
- 315   1      }
- 316          
- 317          u16 adc2tempval(u16 adcval)
- 318          {
- 319   1              u8 i=0;
- 320   1              
- 321   1              for(i=0;i<TEMPMAPNUM-1;i++)
- 322   1              {
- 323   2                      if(adcval>=temp_map[i].adc&&adcval<temp_map[i+1].adc)
- 324   2                      {
- 325   3                              return (adcval-temp_map[i].b)/temp_map[i].k;
- 326   3                      }
- 327   2              }
- 328   1              return (adcval-temp_map[i].b)/temp_map[i].k;
- 329   1      }
- 330          
- 331          
- 332          #define PVAL  16.0F
- 333          #define IVAL  0.82F
- 334          #define DVAL  0.70F
- 335          #define INTEGRAL 1200
- 336          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax)
- 337          {
- 338   1              static s16  lasterror=0, integralval=0;
- 339   1              s16 error,derror, pwmval=0;
- 340   1              error = adcvalwant - adcvalt12;
- 341   1              integralval += error;
- 342   1              if(integralval>INTEGRAL)
- 343   1                      integralval = INTEGRAL;
- 344   1              if(integralval<-INTEGRAL)
- 345   1                      integralval = -INTEGRAL;
- 346   1              
- 347   1              derror = error - lasterror;
- 348   1              pwmval = PVAL*error + IVAL*integralval + DVAL*derror;
- 349   1              lasterror = error;
- 350   1              
- 351   1              if(pwmval > pwmmax)
- 352   1                      pwmval = pwmmax;
- 353   1              return pwmval;
- 354   1      }
- 355          
- 356          void Timer0_Isr(void) interrupt 1
- 357          {
- 358   1              if(KEY1==0){
- 359   2                      _K1+=1;
- 360   2              }else{
- 361   2                      _K1=0;
- 362   2              }
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 7   
+ 301   1              P2 = ADC_RES;               //读取 ADC 结果
+ 302   1              return (ADC_RES<<4)|(ADC_RESL>>4);
+ 303   1      }
+ 304          
+ 305          
+ 306          u16 temp2adcval(u16 temperature)
+ 307          {
+ 308   1              u8 i=0;
+ 309   1              
+ 310   1              for(i=0;i<TEMPMAPNUM-1;i++)
+ 311   1              {
+ 312   2                      if(temperature>=temp_map[i].temp&&temperature<temp_map[i+1].temp)
+ 313   2                      {
+ 314   3                              return temp_map[i].k*temperature+temp_map[i].b;
+ 315   3                      }
+ 316   2              }
+ 317   1              return temp_map[i].k*temperature+temp_map[i].b;
+ 318   1      }
+ 319          
+ 320          u16 adc2tempval(u16 adcval)
+ 321          {
+ 322   1              u8 i=0;
+ 323   1              
+ 324   1              for(i=0;i<TEMPMAPNUM-1;i++)
+ 325   1              {
+ 326   2                      if(adcval>=temp_map[i].adc&&adcval<temp_map[i+1].adc)
+ 327   2                      {
+ 328   3                              return (adcval-temp_map[i].b)/temp_map[i].k;
+ 329   3                      }
+ 330   2              }
+ 331   1              return (adcval-temp_map[i].b)/temp_map[i].k;
+ 332   1      }
+ 333          
+ 334          
+ 335          #define PVAL  16.0F
+ 336          #define IVAL  0.82F
+ 337          #define DVAL  0.70F
+ 338          #define INTEGRAL 1200
+ 339          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax)
+ 340          {
+ 341   1              static s16  lasterror=0, integralval=0;
+ 342   1              s16 error,derror, pwmval=0;
+ 343   1              error = adcvalwant - adcvalt12;
+ 344   1              integralval += error;
+ 345   1              if(integralval>INTEGRAL)
+ 346   1                      integralval = INTEGRAL;
+ 347   1              if(integralval<-INTEGRAL)
+ 348   1                      integralval = -INTEGRAL;
+ 349   1              
+ 350   1              derror = error - lasterror;
+ 351   1              pwmval = PVAL*error + IVAL*integralval + DVAL*derror;
+ 352   1              lasterror = error;
+ 353   1              
+ 354   1              if(pwmval > pwmmax)
+ 355   1                      pwmval = pwmmax;
+ 356   1              return pwmval;
+ 357   1      }
+ 358          
+ 359          void Timer0_Isr(void) interrupt 1
+ 360          {
+ 361   1              if(KEY1==0){
+ 362   2                      _K1+=1;
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 7   
 
- 363   1              if(KEY2==0){
- 364   2                      _K2+=1;
- 365   2              }else{
- 366   2                      _K2=0;
- 367   2              }
- 368   1              if(_K1>80)
- 369   1              {
- 370   2                      _K1=0;
- 371   2                      KEY1_DOWN+=1;
- 372   2              }
- 373   1              if(_K2>80)
- 374   1              {
- 375   2                      _K2=0;
- 376   2                      KEY2_DOWN+=1;
- 377   2              }
- 378   1      }
- 379          
- 380          void Timer0_Init(void)          //1000微秒@40.000MHz
- 381          {
- 382   1              AUXR |= 0x80;                   //定时器时钟1T模式
- 383   1              TMOD &= 0xF0;                   //设置定时器模式
- 384   1              TL0 = 0xC0;                             //设置定时初始值
- 385   1              TH0 = 0x63;                             //设置定时初始值
- 386   1              TF0 = 0;                                //清除TF0标志
- 387   1              TR0 = 1;                                //定时器0开始计时
- 388   1              ET0 = 1;                                //使能定时器0中断
- 389   1      }
- 390          
- 391          void TM1_Isr() interrupt 3
- 392          {
- 393   1              //加热
- 394   1              if(pwmtime<=PWMVAL)
- 395   1              {
- 396   2                      T12SWITCHON;
- 397   2              }
- 398   1              //断开
- 399   1              else
- 400   1              {
- 401   2                      T12SWITCHOFF;
- 402   2              }
- 403   1              pwmtime++;
- 404   1              if(pwmtime>2000)
- 405   1                      pwmtime = 0;
- 406   1      }
- 407          
- 408          void Timer1_Init(void)          //25微秒@40.000MHz
- 409          {
- 410   1              AUXR |= 0x80;                   //定时器时钟1T模式
- 411   1              TMOD &= 0x0F;                   //设置定时器模式
- 412   1              TL1 = 0x18;                             //设置定时初始值
- 413   1              TH1 = 0xFC;                             //设置定时初始值
- 414   1              TF1 = 0;                                //清除TF1标志
- 415   1              TR1 = 1;                                //定时器1开始计时
- 416   1              ET1 = 1;                                //使能定时器1中断
- 417   1      }
- 418          
- 419          
- 420          
- 421          s16 abs(s16 num)
- 422          {
- 423   1              if(num<0)
- 424   1                      return -num;
-C51 COMPILER V9.60.7.0   MAIN                                                              04/29/2024 08:49:15 PAGE 8   
+ 363   2              }else{
+ 364   2                      _K1=0;
+ 365   2              }
+ 366   1              if(KEY2==0){
+ 367   2                      _K2+=1;
+ 368   2              }else{
+ 369   2                      _K2=0;
+ 370   2              }
+ 371   1              if(_K1>80)
+ 372   1              {
+ 373   2                      _K1=0;
+ 374   2                      KEY1_DOWN+=1;
+ 375   2              }
+ 376   1              if(_K2>80)
+ 377   1              {
+ 378   2                      _K2=0;
+ 379   2                      KEY2_DOWN+=1;
+ 380   2              }
+ 381   1      }
+ 382          
+ 383          void Timer0_Init(void)          //1000微秒@40.000MHz
+ 384          {
+ 385   1              AUXR |= 0x80;                   //定时器时钟1T模式
+ 386   1              TMOD &= 0xF0;                   //设置定时器模式
+ 387   1              TL0 = 0xC0;                             //设置定时初始值
+ 388   1              TH0 = 0x63;                             //设置定时初始值
+ 389   1              TF0 = 0;                                //清除TF0标志
+ 390   1              TR0 = 1;                                //定时器0开始计时
+ 391   1              ET0 = 1;                                //使能定时器0中断
+ 392   1      }
+ 393          
+ 394          void TM1_Isr() interrupt 3
+ 395          {
+ 396   1              //加热
+ 397   1              if(pwmtime<=PWMVAL)
+ 398   1              {
+ 399   2                      T12SWITCHON;
+ 400   2              }
+ 401   1              //断开
+ 402   1              else
+ 403   1              {
+ 404   2                      T12SWITCHOFF;
+ 405   2              }
+ 406   1              pwmtime++;
+ 407   1              if(pwmtime>2000)
+ 408   1                      pwmtime = 0;
+ 409   1      }
+ 410          
+ 411          void Timer1_Init(void)          //25微秒@40.000MHz
+ 412          {
+ 413   1              AUXR |= 0x80;                   //定时器时钟1T模式
+ 414   1              TMOD &= 0x0F;                   //设置定时器模式
+ 415   1              TL1 = 0x18;                             //设置定时初始值
+ 416   1              TH1 = 0xFC;                             //设置定时初始值
+ 417   1              TF1 = 0;                                //清除TF1标志
+ 418   1              TR1 = 1;                                //定时器1开始计时
+ 419   1              ET1 = 1;                                //使能定时器1中断
+ 420   1      }
+ 421          
+ 422          
+ 423          
+ 424          s16 abs(s16 num)
+C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:08:57 PAGE 8   
 
- 425   1              else
- 426   1                      return num;
- 427   1      }
- 428          
- 429          
- 430          
+ 425          {
+ 426   1              if(num<0)
+ 427   1                      return -num;
+ 428   1              else
+ 429   1                      return num;
+ 430   1      }
+ 431          
+ 432          
+ 433          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   2409    ----
-   CONSTANT SIZE    =     25    ----
-   XDATA SIZE       =    132      51
+   CODE SIZE        =   2698    ----
+   CONSTANT SIZE    =     35    ----
+   XDATA SIZE       =    132      73
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----

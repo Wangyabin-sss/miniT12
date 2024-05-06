@@ -10,6 +10,7 @@
 
 sbit SCL=P1^5;//SCL
 sbit SDA=P1^4;//SDA
+sbit RES=P1^6;//RES
 
 
 void IIC_delay(void);
