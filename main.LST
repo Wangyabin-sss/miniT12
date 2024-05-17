@@ -1,4 +1,4 @@
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 1   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 1   
 
 
 C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
@@ -48,10 +48,10 @@ line level    source
   38                                                          {400,1060},
   39                                                          {450,1250}};
   40                  
-  41          #define ADCARRAYNUM 5       //t12 adc均值滤波数组
+  41          #define ADCARRAYNUM 10       //t12 adc均值滤波数组
   42          #define SLEEPTIME   300     //休眠时间（秒）
   43          #define CLOSETIME   600     //关闭时间（秒）
-  44          #define MPUGRYLIEMT 20      //mpu6050震动范围（判断静置状态）
+  44          #define MPUGRYLIEMT 40      //mpu6050震动范围（判断静置状态）
   45          #define PWMHZ       20      //当前加热频率
   46          
   47          
@@ -62,7 +62,7 @@ line level    source
   52          u16 adc2tempval(u16 adcval);
   53          int get_pwmval_with_pid(u16 adcvalt12, u16 adcvalwant, s16 pwmmax);
   54          void Timer0_Init(void);
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 2   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 2   
 
   55          void Timer1_Init(void);
   56          s16 abs(s16 num);
@@ -112,7 +112,7 @@ line level    source
   99   2                      ET1 = 0;  //关闭定时器1中断
  100   2                      pwmtime=0;
  101   2                      T12SWITCHOFF; //关闭加热
- 102   2                      delay_us(450);
+ 102   2                      delay_us(550);
  103   2                      //根据设定的温度获取T12热电偶电压值（adc值）
  104   2                      adc_want = temp2adcval(temp_want);
  105   2                      //计算运算放大器输出电压 && 填充数组
@@ -126,7 +126,7 @@ line level    source
  113   2      
  114   2                      //adc滤波数组去掉最大最小值，求均值
  115   2                      t12adc_max=t12adc_val[0];
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 3   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 3   
 
  116   2                      t12adc_min=t12adc_val[0];
  117   2                      t12adc_all = 0;
@@ -190,7 +190,7 @@ line level    source
  175   3                              if(temp_want>450)
  176   3                                      temp_want = 450;
  177   3                              temp_set = temp_want;
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 4   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 4   
 
  178   3                              OLED_ShowNum(102,0,temp_want,3,8);
  179   3                              KEY1_DOWN = 0;
@@ -254,7 +254,7 @@ line level    source
                               OLED_ShowNum(10,1,powerval*10,3,8);
                               
                               if(flag==1)
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 5   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 5   
 
                               {
                                       SWITCH = 1;
@@ -318,7 +318,7 @@ line level    source
  298   1              _nop_();
  299   1              while (!(ADC_CONTR & 0x20));//查询 ADC 完成标志
  300   1              ADC_CONTR &= ~0x20;         //清完成标志
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 6   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 6   
 
  301   1              P2 = ADC_RES;               //读取 ADC 结果
  302   1              return (ADC_RES<<4)|(ADC_RESL>>4);
@@ -382,7 +382,7 @@ line level    source
  360          {
  361   1              if(KEY1==0){
  362   2                      _K1+=1;
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 7   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 7   
 
  363   2              }else{
  364   2                      _K1=0;
@@ -446,7 +446,7 @@ line level    source
  422          
  423          
  424          s16 abs(s16 num)
-C51 COMPILER V9.60.7.0   MAIN                                                              05/06/2024 21:42:44 PAGE 8   
+C51 COMPILER V9.60.7.0   MAIN                                                              05/17/2024 22:30:01 PAGE 8   
 
  425          {
  426   1              if(num<0)
@@ -461,8 +461,8 @@ line level    source
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =   2698    ----
-   CONSTANT SIZE    =     35    ----
-   XDATA SIZE       =    132      73
+   CONSTANT SIZE    =     55    ----
+   XDATA SIZE       =    132      93
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
