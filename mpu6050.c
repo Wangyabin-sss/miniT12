@@ -98,12 +98,13 @@ u8 InitMPU6050(void)
 	MPU_Write_Byte(MPU_FIFO_EN_REG,0XFF);	//FIFO全开
 	MPU_Write_Byte(MPU_INTBP_CFG_REG,0X80);	//INT引脚低电平有效
 	res=MPU_Read_Byte(MPU_DEVICE_ID_REG);
-	if(res==MPU_ADDR)//器件ID正确
+	//if(res==MPU_ADDR)//器件ID正确
 	{
 		MPU_Write_Byte(MPU_PWR_MGMT1_REG,0X01);	//设置CLKSEL,PLL X轴为参考
 		MPU_Write_Byte(MPU_PWR_MGMT2_REG,0X00);	//加速度与陀螺仪都工作
 		MPU_Set_Rate(200);						//设置采样率为200Hz
- 	}else return 1;
+ 	}
+	//else return 1;
 	return 0;
 }
 //******************************************************************************************************
