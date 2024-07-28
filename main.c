@@ -44,6 +44,7 @@ static struct temperature_map{
 #define MPUGRYLIEMT 40      //mpu6050震动范围（判断静置状态）
 #define PWMHZ       20      //当前加热频率
 
+						
 
 void gpio_init(void);
 void ADC_init(void);
@@ -63,9 +64,9 @@ int main()
 	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
 	u16 temp_want = 350,temp_set=350,adc_want;
 	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time=0,mpu_temp;
-	u8 i;
+	u8 i, delay_times=50;
 	
-
+	delay_times = 1000/PWMHZ;
 	for(i=0;i<TEMPMAPNUM;i++)
 	{
 		if(i==TEMPMAPNUM-1)
@@ -88,10 +89,10 @@ int main()
 	EA = 1;
 	SWITCH = 0;
 
-	OLED_ShowString(72,0,"Set:",8);
-	OLED_ShowString(72,1,"Pow:",8);
-	OLED_ShowString(72,2,"Slp:",8);
-	OLED_ShowNum(102,0,temp_want,3,8);
+	OLED_ShowString(68,0,"Set:",8);								OLED_ShowString(120,0,"C",8);
+	OLED_ShowString(68,1,"Pow:",8);OLED_ShowString(104,1,".",8);OLED_ShowString(120,1,"V",8);
+	OLED_ShowString(68,2,"Slp:",8);								OLED_ShowString(120,2,"S",8);
+	OLED_ShowNum(98,0,temp_want,3,8);
 	
 	
 	while(1)
@@ -156,9 +157,10 @@ int main()
 		powerval = ADC_get_val(1);
 		powerval = (powerval*3300)/4096;
 		powerval = powerval/1000*11.2;
-		OLED_ShowNum(102,1,powerval*10,3,8);
+		OLED_ShowNum(92,1,powerval,2,8);
+		OLED_ShowNum(110,1,(int)(powerval*10)%10,1,8);
 		//显示静置时长
-		OLED_ShowNum(102,2,mpu_time/PWMHZ,3,8);
+		OLED_ShowNum(98,2,mpu_time/PWMHZ,3,8);
 		
 
 		
@@ -175,7 +177,7 @@ int main()
 			if(temp_want>450)
 				temp_want = 450;
 			temp_set = temp_want;
-			OLED_ShowNum(102,0,temp_want,3,8);
+			OLED_ShowNum(98,0,temp_want,3,8);
 			KEY1_DOWN = 0;
 		}
 		if(KEY2_DOWN)  //KEY2按下
@@ -184,12 +186,12 @@ int main()
 			if(temp_want<0)
 				temp_want = 0;
 			temp_set = temp_want;
-			OLED_ShowNum(102,0,temp_want,3,8);
+			OLED_ShowNum(98,0,temp_want,3,8);
 			KEY2_DOWN = 0;
 		}
 		
 		
-		delay_ms(50);
+		delay_ms(delay_times);
 	}
 }
 #else
