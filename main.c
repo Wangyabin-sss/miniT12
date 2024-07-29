@@ -41,7 +41,7 @@ static struct temperature_map{
 #define ADCARRAYNUM 10       //t12 adc均值滤波数组
 #define SLEEPTIME   300     //休眠时间（秒）
 #define CLOSETIME   600     //关闭时间（秒）
-#define MPUGRYLIEMT 40      //mpu6050震动范围（判断静置状态）
+#define MPUGRYLIEMT 50      //mpu6050震动范围（判断静置状态）
 #define PWMHZ       20      //当前加热频率
 
 						
@@ -62,7 +62,7 @@ int main()
 {
 	float powerval=0;
 	u32 t12adc_val[ADCARRAYNUM] = {0}, t12adc_max, t12adc_min, t12adc_all, t12adc_average, t12adc_i=0;   //adc均值滤波  adc电压单位mV
-	u16 temp_want = 350,temp_set=350,adc_want;
+	u16 temp_want = 320, temp_set = 320,adc_want;
 	s16 mpu_data=0,mpu_data_diff=0,mpu_data_last=0,mpu_time=0,mpu_temp;
 	u8 i, delay_times=50;
 	
@@ -99,7 +99,7 @@ int main()
 	{
 		ET1 = 0;  //关闭定时器1中断
 		pwmtime=0;
-		T12SWITCHOFF; //关闭加热
+		T12SWITCHOFF; //关闭加热            
 		delay_us(550);
 		//根据设定的温度获取T12热电偶电压值（adc值）
 		adc_want = temp2adcval(temp_want);
